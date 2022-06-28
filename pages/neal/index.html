@@ -1,0 +1,33 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/franklin.css"> <link rel=stylesheet  href="/css/basic.css"> <link rel=icon  href="/assets/favicon.png"> <title>neal.md</title> <header> <div class=blog-name ><a href="/">Jason Pekos</a></div> <nav> <ul> <li><a href="/">Home</a> <li><a href="/menu1/">Misc stuff</a> <li><a href="/menu2/">Contact</a> <li><a href="/menu3/">Teaching</a> </ul> <img src="/assets/hamburger.svg" id=menu-icon > </nav> </header> <div class=franklin-content > <h1 id=reparametrization ><a href="#reparametrization" class=header-anchor >Reparametrization</a></h1> <p>A full implementation of the code here can be found at <a href="https://gist.github.com/JasonPekos/65638ff5d19ef2eafb772f8242b911c8">this gist</a>.</p> <h2 id=whats_going_on_in_stan ><a href="#whats_going_on_in_stan" class=header-anchor >What&#39;s going on in Stan?</a></h2> <p>The Stan user&#39;s guide has a <a href="https://mc-stan.org/docs/2_29/stan-users-guide/reparameterization.html">helpful section on reparametrization</a>. It&#39;s not immediately clear how to implement some of these examples in Turing –- a Stan model is structed as follows:</p> <pre><code class="stan hljs"><span class=hljs-title >data</span> {
+  
+}
+<span class=hljs-title >transformed</span> <span class=hljs-title >data</span> {
+  
+}
+<span class=hljs-title >parameters</span> {
+  
+}
+<span class=hljs-title >transformed</span> <span class=hljs-title >parameters</span> { <span class=hljs-comment ># Look here !</span>
+  
+}
+<span class=hljs-title >model</span> {
+  
+}</code></pre> <p>With a specific block for tracking transformed variables. As far as I can tell, no such option exists in Turing. Here&#39;s what I&#39;ve settled on so far: </p> <h2 id=turing_implementation ><a href="#turing_implementation" class=header-anchor >Turing implementation</a></h2> <p>We can set up the classic Neal&#39;s funnel example in Turing like this:</p> <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> Neal()
+    y ~ Normal(<span class=hljs-number >0</span>,<span class=hljs-number >3</span>)
+    x ~ arraydist([Normal(<span class=hljs-number >0</span>, exp(y/<span class=hljs-number >2</span>)) <span class=hljs-keyword >for</span> i <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:<span class=hljs-number >9</span>])
+<span class=hljs-keyword >end</span></code></pre> <p>Where sampling with the default <code>NUTS&#40;&#41;</code> option returns:</p> <img src="/assets/pages/neal/code/output/neal1.svg" alt=""> <p>Reparametrizing can be done in Turing as follows:</p> <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> Neal2()
+    <span class=hljs-comment ># raw draws</span>
+    y_raw ~ Normal(<span class=hljs-number >0</span>,<span class=hljs-number >1</span>)
+    x_raw ~ arraydist([Normal(<span class=hljs-number >0</span>, <span class=hljs-number >1</span>) <span class=hljs-keyword >for</span> i <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:<span class=hljs-number >9</span>])
+
+    <span class=hljs-comment ># transform:</span>
+    y = <span class=hljs-number >3</span>*y_raw
+    x = exp.(y./<span class=hljs-number >2</span>) .* x_raw
+
+    <span class=hljs-comment ># return:</span>
+    <span class=hljs-keyword >return</span> [x; y]
+<span class=hljs-keyword >end</span></code></pre> <p>Where we use the <code>generated_quantities&#40;&#41;</code> function to pull out the transformed variables:</p> <pre><code class="julia hljs">raw_chain = Turing.MCMCChains.get_sections(sample(Neal2(),
+                                           NUTS(), <span class=hljs-number >1000</span>),
+                                           :parameters)
+
+reparam_chain = reduce(hcat, generated_quantities(Neal2(), raw_chain))</code></pre> <p>Plotting, we can see that this allows much better exploration of the funnel:</p> <img src="/assets/pages/neal/code/output/neal2.svg" alt=""> <p>The above code does the following:</p> <ul> <li><p>In our model <code>Neal2&#40;&#41;</code>, we transform the variables, and then ask the model to return the resulting output. </p> <li><p><code>generated_quantities&#40;&#41;</code> then takes in a <code>chains</code> object, notes what we sampled for our untransformed variables, and then runs the model forward with those values, outputting whatever is in the <code>return</code> statement for each sample in our chain.</p> <li><p>We squash this down into a matrix for easier plotting.</p> </ul> <p>This seems pretty rough, but it&#39;s the best I&#39;ve got. </p> <div class=page-foot > JasonPekos. Last modified: June 28, 2022. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>. </div> </div>

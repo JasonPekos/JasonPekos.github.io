@@ -1,0 +1,14 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/franklin.css"> <link rel=stylesheet  href="/css/basic.css"> <link rel=icon  href="/assets/favicon.png"> <title>turingpitfalls.md</title> <header> <div class=blog-name ><a href="/">Jason Pekos</a></div> <nav> <ul> <li><a href="/">Home</a> <li><a href="/menu1/">Misc stuff</a> <li><a href="/menu2/">Contact</a> <li><a href="/menu3/">Teaching</a> </ul> <img src="/assets/hamburger.svg" id=menu-icon > </nav> </header> <div class=franklin-content > <h1 id=random_variables_vs_observations ><a href="#random_variables_vs_observations" class=header-anchor >Random Variables vs Observations</a></h1> <p>Here’s an issue that I’d occasionally run into: sometimes, it seems like operations on an array in my model &#40;specifically, the array of data I want to condition on&#41; ruins the performance of my sampler. As an example, consider the following skeleton of a spline model. </p> <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> spline(data)
+    <span class=hljs-comment ># unpack x and y </span>
+    x = data[:,<span class=hljs-number >1</span>]
+    y = data[:,<span class=hljs-number >2</span>]
+
+    <span class=hljs-comment ># use x to create b-spline basis</span>
+
+    <span class=hljs-comment ># likelihood</span>
+    y[i] ~ normal around spline output or something similar 
+    ... (cont)</code></pre> <p>This will produce pretty bizzare chains that don&#39;t seem to sample from the correct posterior. Changing this to:</p> <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> spline(x, y) <span class=hljs-comment >#  &lt;- CHANGE IS HERE IN THE FUNCTION SIGNATURE</span>
+    <span class=hljs-comment ># use x to create b-spline basis</span>
+
+    y[i] ~ normal around spline output or something similar 
+    ... (cont)</code></pre> <p>Will work perfectly. Asking around on the slack, Tor Fjelde points out the following:</p> <blockquote> <p>The reason why you&#39;re seeing an issue here is because <code>x</code> and <code>y</code> aren&#39;t treated as observations in the first model A Turing model is very &quot;dumb&quot;: something is considered an observation/something to condition on if it is either a raw value, e.g. <code>1</code>, or if the variable on the LHS of a <code>~</code> is present in the model arguments. In your first model, <code>x</code> and <code>y</code> aren&#39;t actually present in your arguments and so these will be considered random variables.</p> </blockquote> <div class=page-foot > JasonPekos. Last modified: June 28, 2022. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>. </div> </div>
