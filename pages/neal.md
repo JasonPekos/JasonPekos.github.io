@@ -50,7 +50,7 @@ end
 
 Where sampling with the default `NUTS()` option returns:
 
-```julia:./code/ex2
+```julia:./code/ex1
 using Turing, StatsPlots, Distributions, DataFrames # hide
 gr() # set backend # hide
 plotfont = "Computer Modern"; # Same font as TeX documents for consistency  # hide
@@ -78,7 +78,7 @@ savefig(joinpath(@OUTPUT, "neal1.svg")) # hide
 
 Reparametrizing can be done in Turing as follows:
 
-```julia:./code/neal2
+```julia:./code/ex1
 @model function Neal2()
     # raw draws
     y_raw ~ Normal(0,1)
@@ -95,7 +95,7 @@ end
 
 Where we use the `generated_quantities()` function to pull out the transformed variables:
 
-```julia:./code/neal2
+```julia:./code/ex1
 raw_chain = Turing.MCMCChains.get_sections(sample(Neal2(),
                                            NUTS(), 1000),
                                            :parameters)
@@ -105,7 +105,7 @@ reparam_chain = reduce(hcat, generated_quantities(Neal2(), raw_chain))
 
 Plotting, we can see that this allows much better exploration of the funnel:
 
-```julia:./code/neal2plot
+```julia:./code/ex1
 p = plot(layout = 2); # hide
 scatter!(simple_chain["x[1]"], simple_chain[:y], color = :red, opacity = 0.3, subplot = 1); # hide
 title!("Original Parametrization", subplot = 1) # hide
