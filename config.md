@@ -6,8 +6,6 @@
 
 @def mintoclevel = 2
 
-@def prepath = ""
-
 @def ignore = ["node_modules/", "franklin", "franklin.pub"]
 
 \newcommand{\R}{\mathbb R} \newcommand{\scal}[1]{\langle #1 \rangle}
