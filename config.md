@@ -6,6 +6,7 @@
 
 @def mintoclevel = 2
 
+@def prepath = ""
 
 @def ignore = ["node_modules/", "franklin", "franklin.pub"]
 
