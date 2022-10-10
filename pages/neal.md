@@ -32,7 +32,7 @@ model {
 }
 ```
 
-With a specific block for tracking transformed variables. As far as I can tell, no such option exists in Turing. Here's what I've settled on so far: 
+With a specific block for tracking transformed variables. As far as I can tell, no identical option exists in Turing. Instead, the best way is to return any parameters of interest and then call `generated_functions.` 
 
 ## Turing implementation
 
