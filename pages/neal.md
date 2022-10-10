@@ -39,7 +39,7 @@ With a specific block for tracking transformed variables. As far as I can tell, 
 We can set up the classic Neal's funnel example in Turing like this:
 
 ```julia:./code/ex1
-using Turing, StatsPlots, Distributions, DataFrames # hide
+using Turing, StatsPlots, Distributions, DataFrames, Random # hide
 gr() # set backend # hide
 Random.seed!(111) # hide
 
