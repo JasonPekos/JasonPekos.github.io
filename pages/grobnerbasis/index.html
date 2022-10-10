@@ -1,0 +1,50 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/katex/katex.min.css"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/franklin.css"> <link rel=stylesheet  href="/css/basic.css"> <link rel=icon  href="/assets/favicon.png"> <title>Kieran Graphs</title> <header> <div class=blog-name ><a href="/">Jason Pekos</a></div> <nav> <ul> <li><a href="/">Home</a> <li><a href="/menu1/">Misc stuff</a> <li><a href="/menu2/">Contact</a> <li><a href="/menu3/">Teaching</a> </ul> <img src="/assets/hamburger.svg" id=menu-icon > </nav> </header> <div class=franklin-content > <h1 id=general_strategy ><a href="#general_strategy" class=header-anchor >General strategy:</a></h1> <p>Consider a graph, e.g.</p> <img src="/assets/pages/grobnerbasis/code/output/g1.svg" alt=""> <p>In general, we&#39;re going to use the <code>:circular</code> method for displaying graphs. This is because the other methods, e.g. <code>:stress</code> are stochastic, and they mess up the hack we&#39;re using to visualize walks on graphs. So the above graph changes to:</p> <img src="/assets/pages/grobnerbasis/code/output/g2.svg" alt=""> <p>This looks a little odd, but it&#39;s still the same graph we looked at yesterday. We can easily sample a random walk on this graph from a fixed starting point, e.g. a random walk of length <code>4</code> is shown below:</p> <img src="/assets/pages/grobnerbasis/code/output/g3.svg" alt=""> <p>We&#39;re going to sample a random walk of length <code>n</code> for <code>n</code> large, e.g. <span class=katex ><span class=katex-mathml ><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><msup><mn>0</mn><mo mathvariant=normal  lspace=0em  rspace=0em >′</mo></msup><mn>000</mn></mrow><annotation encoding="application/x-tex">100&#x27;000</annotation></semantics></math></span><span class=katex-html  aria-hidden=true ><span class=base ><span class=strut  style="height:0.7519em;"></span><span class=mord >10</span><span class=mord ><span class=mord >0</span><span class=msupsub ><span class=vlist-t ><span class=vlist-r ><span class=vlist  style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class=pstrut  style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class=mord >000</span></span></span></span> or whatever. From this, we&#39;re going to get out a vector of visited nodes, e.g. <code>&#91;1 2 3 2 1 ...&#93;</code>. We&#39;re going to loop over this vector, returning every primitive even walk that is a subset of this larger walk. Explicitly:</p> <pre><code class="julia hljs"><span class=hljs-keyword >function</span> extractevenwalks(walk::<span class=hljs-built_in >Vector</span>{<span class=hljs-built_in >Int64</span>})
+    <span class=hljs-comment ># This set will store all of our simple even walks. </span>
+    finalset = <span class=hljs-built_in >Set</span>()
+    <span class=hljs-comment ># This set is used for validation because I&#x27;m lazy</span>
+    validation = <span class=hljs-built_in >Set</span>()
+
+    <span class=hljs-comment ># Loop over every node in the walk, except for the last one</span>
+    <span class=hljs-keyword >for</span> (i1, v1) <span class=hljs-keyword >in</span> enumerate(walk[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>-<span class=hljs-number >1</span>])
+
+        <span class=hljs-comment ># Wipe set we use to store edges</span>
+        edges = <span class=hljs-built_in >Set</span>()
+
+        <span class=hljs-comment ># For every node, loop over every node after that node in the walk. </span>
+        <span class=hljs-keyword >for</span> (i2, v2) <span class=hljs-keyword >in</span> enumerate(walk[i1 + <span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>])
+
+            <span class=hljs-comment ># record edge</span>
+            edge = <span class=hljs-built_in >Set</span>([walk[i1 + i2 - <span class=hljs-number >1</span>], walk[i1 + i2]])
+
+            <span class=hljs-comment ># If we&#x27;ve already traversed along this edge, break.</span>
+            <span class=hljs-keyword >if</span> edge ∈ edges
+                <span class=hljs-keyword >break</span>;
+            <span class=hljs-keyword >else</span>
+                push!(edges, edge)
+            <span class=hljs-keyword >end</span>
+
+            <span class=hljs-comment ># Check if we&#x27;ve completed a loop.</span>
+            <span class=hljs-keyword >if</span> v1 == v2
+
+                <span class=hljs-comment ># Propose this as a candidate.</span>
+                candidate = walk[i1:i2 + i1]
+
+                <span class=hljs-comment ># If it&#x27;s even, continue. </span>
+                <span class=hljs-keyword >if</span> length(candidate) % <span class=hljs-number >2</span> != <span class=hljs-number >0</span>
+                    <span class=hljs-comment ># If it&#x27;s new, add it to our set</span>
+                    <span class=hljs-keyword >if</span> <span class=hljs-built_in >Set</span>(candidate[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>-<span class=hljs-number >1</span>]) ∈ validation
+                        <span class=hljs-keyword >break</span>
+                    <span class=hljs-keyword >else</span>
+                        push!(finalset, candidate)
+                        push!(validation, <span class=hljs-built_in >Set</span>(candidate[<span class=hljs-number >1</span>:<span class=hljs-keyword >end</span>-<span class=hljs-number >1</span>]))
+                    <span class=hljs-keyword >end</span>
+                    <span class=hljs-keyword >break</span>;
+                <span class=hljs-keyword >end</span>
+            <span class=hljs-keyword >end</span>
+        <span class=hljs-keyword >end</span>
+    <span class=hljs-keyword >end</span>
+    <span class=hljs-comment ># Return our set of walks</span>
+    <span class=hljs-keyword >return</span> finalset
+<span class=hljs-keyword >end</span></code></pre> <p>This code doesn&#39;t accept walks which traverse back along edges we&#39;ve already visited. We can test this out on the above graph with a walk of length <code>40</code>:</p> <pre><code class="julia hljs">n = <span class=hljs-number >40000</span>
+rw = randomwalk(simple_graph_1, <span class=hljs-number >1</span>, n) <span class=hljs-comment ># start at node 1, walk of length n</span></code></pre> <pre><code class="plaintext hljs">ewset = extractevenwalks(rw) = Set(Any[[1, 2, 3, 4, 5, 3, 1]])
+</code></pre> <p>Which can be plotted as:</p> <img src="/assets/pages/grobnerbasis/code/output/g4.svg" alt=""> <p>Which is the desired result. </p> <div class=page-foot > JasonPekos. Last modified: October 10, 2022. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>. </div> </div>
