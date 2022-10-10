@@ -6,7 +6,8 @@ rss = "Jason Misc Stuff"
 +++
 @def tags = ["syntax", "code"]
 
-
+In progress
+<!-- 
 # Julia Bayes 
 ## Reparametrization in Turing.jl
 
@@ -25,4 +26,4 @@ Way later
     - SIR - Diffeq
     - SIR - Markov process
     - Partially specified models
-- Paintings 
+- Paintings  -->

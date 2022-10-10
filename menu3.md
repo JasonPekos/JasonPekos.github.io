@@ -7,3 +7,5 @@
 # Winter 2022
 - Math 1MP3, Introduction to Mathematical / Scientific computing. 
   - Website: [https://jasonpekos.github.io/Math1MP3/](https://jasonpekos.github.io/Math1MP3/)
+
+  
