@@ -77,7 +77,7 @@ savefig(joinpath(@OUTPUT, "neal1.svg")) # hide
 
 ### Divergence Diagnostics in Turing
 
-Turing tags [divergent transition](https://mc-stan.org/docs/reference-manual/divergent-transitions.html) with `numerical_error == 1`. We can quickly check if our chain has any divergences with:
+Turing tags [divergent transitions](https://mc-stan.org/docs/reference-manual/divergent-transitions.html) with `numerical_error == 1`. We can quickly check if our chain has any divergences with:
 
 ```julia:./code/ex1
 sum(simple_chain[:numerical_error])
