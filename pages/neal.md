@@ -12,7 +12,7 @@ rss = "neal"
 A full implementation of the code here can be found at [this gist](https://gist.github.com/JasonPekos/65638ff5d19ef2eafb772f8242b911c8).
 ## What's going on in Stan?
 
-The Stan user's guide has a [helpful section on reparametrization](https://mc-stan.org/docs/2_29/stan-users-guide/reparameterization.html). It's not immediately clear how to implement some of these examples in Turing --- a Stan model is structed as follows:
+The Stan user's guide has a [helpful section on reparametrization](https://mc-stan.org/docs/2_29/stan-users-guide/reparameterization.html). It's not immediately clear how to implement some of these examples in Turing --- a Stan model is structured as follows:
 
 ```Stan
 data {
@@ -32,7 +32,7 @@ model {
 }
 ```
 
-With a specific block for tracking transformed variables. As far as I can tell, no identical option exists in Turing. Instead, the best way is to return any parameters of interest and then call `generated_functions.` 
+With a specific block for tracking transformed variables. As far as I can tell, no identical option exists in Turing. Instead, the best way is to return any parameters of interest and then call `generated_quantities.` 
 
 ## Turing implementation
 
@@ -86,7 +86,7 @@ sum(simple_chain[:numerical_error])
 Indicating that we have:
 \show{ex1}
 
-divergences. We can add divergences indicators to our posterior sample plot, 
+divergences. We can add divergence indicators to our posterior sample plot, 
 pointing us towards areas of our geometry that are 
 problematic:
 
@@ -107,12 +107,12 @@ savefig(joinpath(@OUTPUT, "neal1_update.svg")) # hide
 
 ## Ways Forward
 
-Divergent transistions are usually symptoms of some deeper degeneracy, and as such can indicate 
+Divergent transitions are usually symptoms of some deeper degeneracy, and as such can indicate 
 issues with biased inference in your MCMC sampler, non-identifiability in your model, etc.
 
 A guide to taming divergences can be found [here](https://mc-stan.org/misc/warnings.html). 
 
-As discused in the Stan handbook, The most powerful solution is 
+As discussed in the Stan handbook, the most powerful solution is 
 usually model reparametrization, which can be done in Turing as follows:
 
 ```julia:./code/ex1
