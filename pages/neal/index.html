@@ -1,4 +1,4 @@
-<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/franklin.css"> <link rel=stylesheet  href="/css/basic.css"> <link rel=icon  href="/assets/favicon.png"> <title>neal.md</title> <header> <div class=blog-name ><a href="/">Jason Pekos</a></div> <nav> <ul> <li><a href="/">Home</a> <li><a href="/menu1/">Misc stuff</a> <li><a href="/menu2/">Contact</a> <li><a href="/menu3/">Teaching</a> </ul> <img src="/assets/hamburger.svg" id=menu-icon > </nav> </header> <div class=franklin-content > <h1 id=reparametrization_and_some_divergence_diagnostics_in_turing ><a href="#reparametrization_and_some_divergence_diagnostics_in_turing" class=header-anchor >Reparametrization &#40;and some Divergence Diagnostics&#41; in Turing</a></h1> <p>A full implementation of the code here can be found at <a href="https://gist.github.com/JasonPekos/65638ff5d19ef2eafb772f8242b911c8">this gist</a>.</p> <h2 id=whats_going_on_in_stan ><a href="#whats_going_on_in_stan" class=header-anchor >What&#39;s going on in Stan?</a></h2> <p>The Stan user&#39;s guide has a <a href="https://mc-stan.org/docs/2_29/stan-users-guide/reparameterization.html">helpful section on reparametrization</a>. It&#39;s not immediately clear how to implement some of these examples in Turing –- a Stan model is structed as follows:</p> <pre><code class="Stan hljs"><span class=hljs-title >data</span> {
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/libs/highlight/github.min.css"> <link rel=stylesheet  href="/css/franklin.css"> <link rel=stylesheet  href="/css/basic.css"> <link rel=icon  href="/assets/favicon.png"> <title>neal.md</title> <header> <div class=blog-name ><a href="/">Jason Pekos</a></div> <nav> <ul> <li><a href="/">Home</a> <li><a href="/menu1/">Misc stuff</a> <li><a href="/menu2/">Contact</a> <li><a href="/menu3/">Teaching</a> </ul> <img src="/assets/hamburger.svg" id=menu-icon > </nav> </header> <div class=franklin-content > <h1 id=reparametrization_and_some_divergence_diagnostics_in_turing ><a href="#reparametrization_and_some_divergence_diagnostics_in_turing" class=header-anchor >Reparametrization &#40;and some Divergence Diagnostics&#41; in Turing</a></h1> <p>A full implementation of the code here can be found at <a href="https://gist.github.com/JasonPekos/65638ff5d19ef2eafb772f8242b911c8">this gist</a>.</p> <h2 id=whats_going_on_in_stan ><a href="#whats_going_on_in_stan" class=header-anchor >What&#39;s going on in Stan?</a></h2> <p>The Stan user&#39;s guide has a <a href="https://mc-stan.org/docs/2_29/stan-users-guide/reparameterization.html">helpful section on reparametrization</a>. It&#39;s not immediately clear how to implement some of these examples in Turing –- a Stan model is structured as follows:</p> <pre><code class="Stan hljs"><span class=hljs-title >data</span> {
   
 }
 <span class=hljs-title >transformed</span> <span class=hljs-title >data</span> {
@@ -12,12 +12,12 @@
 }
 <span class=hljs-title >model</span> {
   
-}</code></pre> <p>With a specific block for tracking transformed variables. As far as I can tell, no identical option exists in Turing. Instead, the best way is to return any parameters of interest and then call <code>generated_functions.</code> </p> <h2 id=turing_implementation ><a href="#turing_implementation" class=header-anchor >Turing implementation</a></h2> <p>We can set up the classic Neal&#39;s funnel example in Turing like this:</p> <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> Neal()
+}</code></pre> <p>With a specific block for tracking transformed variables. As far as I can tell, no identical option exists in Turing. Instead, the best way is to return any parameters of interest and then call <code>generated_quantities.</code> </p> <h2 id=turing_implementation ><a href="#turing_implementation" class=header-anchor >Turing implementation</a></h2> <p>We can set up the classic Neal&#39;s funnel example in Turing like this:</p> <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> Neal()
     y ~ Normal(<span class=hljs-number >0</span>,<span class=hljs-number >3</span>)
     x ~ arraydist([Normal(<span class=hljs-number >0</span>, exp(y/<span class=hljs-number >2</span>)) <span class=hljs-keyword >for</span> i <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:<span class=hljs-number >9</span>])
 <span class=hljs-keyword >end</span></code></pre> <p>Where sampling with the default <code>NUTS&#40;&#41;</code> option returns:</p> <img src="/assets/pages/neal/code/output/neal1.svg" alt=""> <h3 id=divergence_diagnostics_in_turing ><a href="#divergence_diagnostics_in_turing" class=header-anchor >Divergence Diagnostics in Turing</a></h3> <p>Turing tags <a href="https://mc-stan.org/docs/reference-manual/divergent-transitions.html">divergent transition</a> with <code>numerical_error &#61;&#61; 1</code>. We can quickly check if our chain has any divergences with:</p> <pre><code class="julia hljs">sum(simple_chain[:numerical_error])</code></pre>
 <p>Indicating that we have: <pre><code class="plaintext hljs">76.0</code></pre></p>
-<p>divergences. We can add divergences indicators to our posterior sample plot,  pointing us towards areas of our geometry that are  problematic:</p>
+<p>divergences. We can add divergence indicators to our posterior sample plot,  pointing us towards areas of our geometry that are  problematic:</p>
 <pre><code class="julia hljs">divergences_naive_param = filter(row -&gt; row.numerical_error == <span class=hljs-number >1</span>,
                                  DataFrame(simple_chain))
 
@@ -29,9 +29,9 @@ scatter!(divergences_naive_param[!, <span class=hljs-string >&quot;x[1]&quot;</s
          label = <span class=hljs-string >&quot;divergence&quot;</span>)</code></pre>
 <img src="/assets/pages/neal/code/output/neal1_update.svg" alt="">
 <h2 id=ways_forward ><a href="#ways_forward" class=header-anchor >Ways Forward</a></h2>
-<p>Divergent transistions are usually symptoms of some deeper degeneracy, and as such can indicate  issues with biased inference in your MCMC sampler, non-identifiability in your model, etc.</p>
+<p>Divergent transitions are usually symptoms of some deeper degeneracy, and as such can indicate  issues with biased inference in your MCMC sampler, non-identifiability in your model, etc.</p>
 <p>A guide to taming divergences can be found <a href="https://mc-stan.org/misc/warnings.html">here</a>. </p>
-<p>As discused in the Stan handbook, The most powerful solution is  usually model reparametrization, which can be done in Turing as follows:</p>
+<p>As discussed in the Stan handbook, the most powerful solution is  usually model reparametrization, which can be done in Turing as follows:</p>
 <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> Neal2()
     <span class=hljs-comment ># raw draws</span>
     y_raw ~ Normal(<span class=hljs-number >0</span>,<span class=hljs-number >1</span>)
@@ -59,7 +59,7 @@ reparam_chain = reduce(hcat, generated_quantities(Neal2(), raw_chain))</code></p
 <img src="/assets/pages/neal/code/output/neal2.svg" alt="">
 <hr />
 <div class=page-foot >
-    JasonPekos. Last modified: October 10, 2022.
+    JasonPekos. Last modified: November 28, 2022.
     Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
 </div>
 </div>
