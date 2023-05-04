@@ -94,7 +94,9 @@ We have the following data from Tarone (1982) via BDA3:
 | 4                | 14             |
 }
 
+NumPyro code can be found [here](/pages/BayesEx/BDA3/RatTumor/RTNP).
 
+Turing code can be found here: (TBD)\
 
 
 
