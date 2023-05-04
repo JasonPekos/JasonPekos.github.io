@@ -23,6 +23,44 @@
 
 <item>
   <title>
+    <![CDATA[  bio1np.md  ]]>
+  </title>
+  <link> https://JasonPekos.github.io/pages/BayesEx/BDA3/BioAssay1/b1NP/index.html </link>
+  <guid> https://JasonPekos.github.io/pages/BayesEx/BDA3/BioAssay1/b1NP/index.html </guid>
+  <description>
+    <![CDATA[  bio1np  ]]>
+  </description>  
+    
+  <pubDate>Sat, 22 Apr 2023 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>JasonPekos</atom:name>
+  </atom:author>
+        
+</item>
+
+<item>
+  <title>
+    <![CDATA[  bio1.md  ]]>
+  </title>
+  <link> https://JasonPekos.github.io/pages/BayesEx/BDA3/BioAssay1/bioassay1/index.html </link>
+  <guid> https://JasonPekos.github.io/pages/BayesEx/BDA3/BioAssay1/bioassay1/index.html </guid>
+  <description>
+    <![CDATA[  bio1  ]]>
+  </description>  
+    
+  <pubDate>Sat, 22 Apr 2023 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>JasonPekos</atom:name>
+  </atom:author>
+        
+</item>
+
+<item>
+  <title>
     <![CDATA[  contact  ]]>
   </title>
   <link> https://JasonPekos.github.io/menu2/index.html </link>
@@ -32,6 +70,44 @@
   </description>  
     
   <pubDate>Wed, 01 May 2019 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>JasonPekos</atom:name>
+  </atom:author>
+        
+</item>
+
+<item>
+  <title>
+    <![CDATA[  Kieran Graphs  ]]>
+  </title>
+  <link> https://JasonPekos.github.io/pages/css_scratch/index.html </link>
+  <guid> https://JasonPekos.github.io/pages/css_scratch/index.html </guid>
+  <description>
+    <![CDATA[  neal  ]]>
+  </description>  
+    
+  <pubDate>Fri, 22 Mar 2019 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>JasonPekos</atom:name>
+  </atom:author>
+        
+</item>
+
+<item>
+  <title>
+    <![CDATA[  Kieran Graphs  ]]>
+  </title>
+  <link> https://JasonPekos.github.io/pages/grobnerbasis/index.html </link>
+  <guid> https://JasonPekos.github.io/pages/grobnerbasis/index.html </guid>
+  <description>
+    <![CDATA[  neal  ]]>
+  </description>  
+    
+  <pubDate>Fri, 22 Mar 2019 00:00:00 +0000</pubDate>  
   
   
   <atom:author>
@@ -80,6 +156,25 @@
 
 <item>
   <title>
+    <![CDATA[  Misc Stuff  ]]>
+  </title>
+  <link> https://JasonPekos.github.io/menu1/index.html </link>
+  <guid> https://JasonPekos.github.io/menu1/index.html </guid>
+  <description>
+    <![CDATA[  Jason Misc Stuff  ]]>
+  </description>  
+    
+  <pubDate>Fri, 22 Mar 2019 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>JasonPekos</atom:name>
+  </atom:author>
+        
+</item>
+
+<item>
+  <title>
     <![CDATA[  Chain Binomial in Turing  ]]>
   </title>
   <link> https://JasonPekos.github.io/pages/pathfinder/index.html </link>
@@ -105,44 +200,6 @@
   <guid> https://JasonPekos.github.io/pages/turingpitfalls/index.html </guid>
   <description>
     <![CDATA[  tpf  ]]>
-  </description>  
-    
-  <pubDate>Fri, 22 Mar 2019 00:00:00 +0000</pubDate>  
-  
-  
-  <atom:author>
-    <atom:name>JasonPekos</atom:name>
-  </atom:author>
-        
-</item>
-
-<item>
-  <title>
-    <![CDATA[  Kieran Graphs  ]]>
-  </title>
-  <link> https://JasonPekos.github.io/pages/grobnerbasis/index.html </link>
-  <guid> https://JasonPekos.github.io/pages/grobnerbasis/index.html </guid>
-  <description>
-    <![CDATA[  neal  ]]>
-  </description>  
-    
-  <pubDate>Fri, 22 Mar 2019 00:00:00 +0000</pubDate>  
-  
-  
-  <atom:author>
-    <atom:name>JasonPekos</atom:name>
-  </atom:author>
-        
-</item>
-
-<item>
-  <title>
-    <![CDATA[  Misc Stuff  ]]>
-  </title>
-  <link> https://JasonPekos.github.io/menu1/index.html </link>
-  <guid> https://JasonPekos.github.io/menu1/index.html </guid>
-  <description>
-    <![CDATA[  Jason Misc Stuff  ]]>
   </description>  
     
   <pubDate>Fri, 22 Mar 2019 00:00:00 +0000</pubDate>  
