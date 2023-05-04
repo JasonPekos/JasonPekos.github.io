@@ -7,17 +7,23 @@ rss = "RT"
 @def tags = ["syntax", "code"]
 
 # Setting:
-The situation here is the following: We want to estimate the prevalence of tumours in a control group of type "F344" rats. In our latest experiment, we have fourteen rats ($n = 14$), and we observe four tumours ($y = 4$).
+The situation here is the following: We want to estimate the probability of tumours in a control group of type "F344" rats. In our latest experiment, we have fourteen rats ($n = 14$), and we observe four tumours ($y = 4$).
 
 
 Additionally, we have historical data from seventy previous experiments, which we can use to inform our model. In total, we have $x_i = 71$ total experiments with $n_i$ rats, and $y_i$ tumours, with
 $x_{71}$ being the experiment of primary interest. 
 
+# Models:
+
+NumPyro code can be found [here](/pages/BayesEx/BDA3/RatTumor/RTNP).
+
+Turing code can be found here: (TBD)\
+
+
 # The Dataset:
 
 We have the following data from Tarone (1982) via BDA3:
 
-\collaps{Dataset: **Press here to expand**}{
 
 | Number of tumors | Number of rats |
 |------------------|----------------|
@@ -92,11 +98,7 @@ We have the following data from Tarone (1982) via BDA3:
 | 15               | 47             |
 | 9                | 24             |
 | 4                | 14             |
-}
 
-NumPyro code can be found [here](/pages/BayesEx/BDA3/RatTumor/RTNP).
-
-Turing code can be found here: (TBD)\
 
 
 
