@@ -27,3 +27,8 @@ Way later
     - SIR - Markov process
     - Partially specified models
 - Paintings  -->
+
+# Bayesian Modeling with PPLs:
+- Classic analysis of laboratory datasets:
+    - Racine et al. (1986): [Bioassay Logistic Regression](/pages/BayesEx/BDA3/BioAssay1/bioassay1)
+- Plotting HMC diagnostics (+ reparametrization) in Turing.jl: [here](/pages/neal)
