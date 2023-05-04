@@ -23,8 +23,11 @@ This is the classic bioassay example from BDA3, originally via Racine et al. (19
 
 ---
 
-Turing code can be found here: (TBA)\
 
 
 NumPyro code can be found [here](/pages/BayesEx/BDA3/BioAssay1/b1NP).
+
+
+Turing code can be found here: (TBD)\
+
 

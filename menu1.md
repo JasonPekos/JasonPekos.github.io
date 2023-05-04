@@ -31,4 +31,6 @@ Way later
 # Bayesian Modeling with PPLs:
 - Classic analysis of laboratory datasets:
     - Racine et al. (1986): [Bioassay Logistic Regression](/pages/BayesEx/BDA3/BioAssay1/bioassay1)
+    - Tarone (1982): [Rat Tumor Hierarchical Model](/pages/BayesEx/BDA3/RatTumor/RT1)
 - Plotting HMC diagnostics (+ reparametrization) in Turing.jl: [here](/pages/neal)
+
