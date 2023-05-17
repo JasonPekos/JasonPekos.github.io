@@ -15,8 +15,9 @@
 }</code></pre> <p>With a specific block for tracking transformed variables. As far as I can tell, no identical option exists in Turing. Instead, the best way is to return any parameters of interest and then call <code>generated_quantities.</code> </p> <h2 id=turing_implementation ><a href="#turing_implementation" class=header-anchor >Turing implementation</a></h2> <p>We can set up the classic Neal&#39;s funnel example in Turing like this:</p> <pre><code class="julia hljs"><span class=hljs-meta >@model</span> <span class=hljs-keyword >function</span> Neal()
     y ~ Normal(<span class=hljs-number >0</span>,<span class=hljs-number >3</span>)
     x ~ arraydist([Normal(<span class=hljs-number >0</span>, exp(y/<span class=hljs-number >2</span>)) <span class=hljs-keyword >for</span> i <span class=hljs-keyword >in</span> <span class=hljs-number >1</span>:<span class=hljs-number >9</span>])
-<span class=hljs-keyword >end</span></code></pre> <p>Where sampling with the default <code>NUTS&#40;&#41;</code> option returns:</p> <img src="/assets/pages/neal/code/output/neal1.svg" alt=""> <h3 id=divergence_diagnostics_in_turing ><a href="#divergence_diagnostics_in_turing" class=header-anchor >Divergence Diagnostics in Turing</a></h3> <p>Turing tags <a href="https://mc-stan.org/docs/reference-manual/divergent-transitions.html">divergent transitions</a> with <code>numerical_error &#61;&#61; 1</code>. We can quickly check if our chain has any divergences with:</p> <pre><code class="julia hljs">sum(simple_chain[:numerical_error])</code></pre>
-<p>Indicating that we have: <pre><code class="plaintext hljs">76.0</code></pre></p>
+<span class=hljs-keyword >end</span></code></pre> <p>Where sampling with the default <code>NUTS&#40;&#41;</code> option returns:</p> <p><span style="color:red;">// Image matching '/assets/pages/neal/code/neal1' not found. //</span></p> <h3 id=divergence_diagnostics_in_turing ><a href="#divergence_diagnostics_in_turing" class=header-anchor >Divergence Diagnostics in Turing</a></h3> <p>Turing tags <a href="https://mc-stan.org/docs/reference-manual/divergent-transitions.html">divergent transitions</a> with <code>numerical_error &#61;&#61; 1</code>. We can quickly check if our chain has any divergences with:</p> <pre><code class="julia hljs">sum(simple_chain[:numerical_error])</code></pre>
+<p>Indicating that we have: <pre><code class="plaintext hljs">UndefVarError: `simple_chain` not defined
+</code></pre></p>
 <p>divergences. We can add divergence indicators to our posterior sample plot,  pointing us towards areas of our geometry that are  problematic:</p>
 <pre><code class="julia hljs">divergences_naive_param = filter(row -&gt; row.numerical_error == <span class=hljs-number >1</span>,
                                  DataFrame(simple_chain))
@@ -27,7 +28,7 @@ scatter!(divergences_naive_param[!, <span class=hljs-string >&quot;x[1]&quot;</s
          color = :aquamarine,
          opacity = <span class=hljs-number >0.8</span>,
          label = <span class=hljs-string >&quot;divergence&quot;</span>)</code></pre>
-<img src="/assets/pages/neal/code/output/neal1_update.svg" alt="">
+<p><span style="color:red;">// Image matching '/assets/pages/neal/code/neal1_update' not found. //</span></p>
 <h2 id=ways_forward ><a href="#ways_forward" class=header-anchor >Ways Forward</a></h2>
 <p>Divergent transitions are usually symptoms of some deeper degeneracy, and as such can indicate  issues with biased inference in your MCMC sampler, non-identifiability in your model, etc.</p>
 <p>A guide to taming divergences can be found <a href="https://mc-stan.org/misc/warnings.html">here</a>. </p>
@@ -53,13 +54,14 @@ raw_chain = Turing.MCMCChains.get_sections(rawer_chain,
 reparam_chain = reduce(hcat, generated_quantities(Neal2(), raw_chain))</code></pre>
 <p>We can check the number of divergences in our reparametrized chain:</p>
 <pre><code class="julia hljs">div = sum(rawer_chain[:numerical_error])</code></pre>
-<pre><code class="plaintext hljs">Our new parametrization has: 0.0 divergences</code></pre>
+<pre><code class="plaintext hljs">UndefVarError: `rawer_chain` not defined
+</code></pre>
 <p>Plotting, we can see that this allows much better exploration of the funnel:</p>
 
-<img src="/assets/pages/neal/code/output/neal2.svg" alt="">
+<p><span style="color:red;">// Image matching '/assets/pages/neal/code/neal2' not found. //</span></p>
 <hr />
 <div class=page-foot >
-    JasonPekos. Last modified: May 04, 2023.
+    JasonPekos. Last modified: May 17, 2023.
     Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
 </div>
 
