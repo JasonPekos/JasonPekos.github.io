@@ -27,9 +27,12 @@ Way later
     - SIR - Markov process
     - Partially specified models
 - Paintings  -->
+# Troubleshooting stuff
+- Running ClusterMQ on Sharcnet via SSH: [here](/pages/scratchpad/cmq_sharc)
+
 
 # Bayesian Modeling with PPLs:
-- Classic analysis of laboratory datasets:
+- Implementing classic analysis of laboratory datasets in various PPLs:
     - Racine et al. (1986): [Bioassay Logistic Regression](/pages/BayesEx/BDA3/BioAssay1/bioassay1)
     - Tarone (1982): [Rat Tumor Hierarchical Model](/pages/BayesEx/BDA3/RatTumor/RT1)
 - Plotting HMC diagnostics (+ reparametrization) in Turing.jl: [here](/pages/neal)
