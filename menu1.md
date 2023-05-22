@@ -29,6 +29,7 @@ Way later
 - Paintings  -->
 # Troubleshooting stuff
 - Running ClusterMQ on Sharcnet via SSH: [here](/pages/scratchpad/cmq_sharc)
+- Installing `sf` or `geojsonio` on Sharcnet: [here](/pages/scratchpad/sf_sharc)
 
 
 # Bayesian Modeling with PPLs:
