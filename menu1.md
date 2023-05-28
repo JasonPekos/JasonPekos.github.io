@@ -38,3 +38,6 @@ Way later
     - Tarone (1982): [Rat Tumor Hierarchical Model](/pages/BayesEx/BDA3/RatTumor/RT1)
 - Plotting HMC diagnostics (+ reparametrization) in Turing.jl: [here](/pages/neal)
 
+# Temp - Climate Can
+- [PEI-1](/pages/climate-can/pei-1)
+
