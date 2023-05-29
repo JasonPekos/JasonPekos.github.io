@@ -7,7 +7,7 @@ rss = "Jason Misc Stuff"
 @def tags = ["syntax", "code"]
 
 
-# Monthly Percipitation
+# Monthly Precipitation
 \fig{/_assets/climate-can/on-pcp.gif}
 
 # Monthly Temperature
