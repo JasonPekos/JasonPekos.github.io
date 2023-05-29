@@ -115,10 +115,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
-<url>
-    <loc>https://JasonPekos.github.io/pages/climate-can/testvis/</loc>
-    <lastmod>2023-05-29</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
 </urlset>
