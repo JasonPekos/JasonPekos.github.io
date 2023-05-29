@@ -40,4 +40,4 @@ Way later
 
 # Temp - Climate Can
 - [PEI-1](/pages/climate-can/pei-1)
-
+- [Network](/pages/climate-can/visnet)
