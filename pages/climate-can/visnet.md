@@ -6,6 +6,8 @@ rss = "Jason Misc Stuff"
 +++
 @def tags = ["syntax", "code"]
 
+The network diagram might take a minute to load:
+
 
 ~~~
 {{insert testvis.html}}
