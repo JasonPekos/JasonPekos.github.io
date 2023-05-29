@@ -8,4 +8,6 @@ rss = "Jason Misc Stuff"
 
 
 \fig{/_assets/climate-can/on-pcp.gif}
+\fig{/_assets/climate-can/on-temp.gif}
+
 
