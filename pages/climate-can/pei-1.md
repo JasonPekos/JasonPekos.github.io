@@ -7,7 +7,8 @@ rss = "Jason Misc Stuff"
 @def tags = ["syntax", "code"]
 
 
+# Predicted Difference in Productivity under Low and High Emission Scenarios
 
 
-\fig{/_assets/climate-can/cmip-whole.png}
+\fig{/_assets/climate-can/pei_2.png}
 
