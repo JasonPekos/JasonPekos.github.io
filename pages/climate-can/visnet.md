@@ -8,5 +8,5 @@ rss = "Jason Misc Stuff"
 
 
 ~~~
-{{insert _assets/climate-can/testvis.html}}
+{{insert testvis.html}}
 ~~~
