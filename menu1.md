@@ -6,7 +6,6 @@ rss = "Jason Misc Stuff"
 +++
 @def tags = ["syntax", "code"]
 
-In progress
 <!-- 
 # Julia Bayes 
 ## Reparametrization in Turing.jl
@@ -27,9 +26,6 @@ Way later
     - SIR - Markov process
     - Partially specified models
 - Paintings  -->
-# Troubleshooting stuff
-- Running ClusterMQ on Sharcnet via SSH: [here](/pages/scratchpad/cmq_sharc)
-- Installing `sf` or `geojsonio` on Sharcnet: [here](/pages/scratchpad/sf_sharc)
 
 
 # Bayesian Modeling with PPLs:
@@ -38,7 +34,13 @@ Way later
     - Tarone (1982): [Rat Tumor Hierarchical Model](/pages/BayesEx/BDA3/RatTumor/RT1)
 - Plotting HMC diagnostics (+ reparametrization) in Turing.jl: [here](/pages/neal)
 
+# Troubleshooting stuff
+- Running ClusterMQ on Sharcnet via SSH: [here](/pages/scratchpad/cmq_sharc)
+- Installing `sf` or `geojsonio` on Sharcnet: [here](/pages/scratchpad/sf_sharc)
+
+@@colbox-blue
 # Temporary Viz Links - Climate Can
 - [PEI-1](/pages/climate-can/pei-1)
 - [Network](/pages/climate-can/visnet)
 - [ON gifs](/pages/climate-can/anim)
+@@
