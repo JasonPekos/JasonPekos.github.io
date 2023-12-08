@@ -1,6 +1,8 @@
 @def title = "Jason Pekos - Data Scientist"
 @def tags = ["Data Science", "Bayesian Statistics", "Machine Learning"]
 
+
+
 # About me
 
 ~~~
@@ -32,4 +34,7 @@
 
 ## Get in Touch
 
-Feel free to connect with me on [LinkedIn](#) or send me an email at `jason (dot) pekos (at) gmail (dot) com`.
+Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/jasonpekos/) or send me an email at `jason (dot) pekos (at) gmail (dot) com`.
+
+
+![anim](https://raw.githubusercontent.com/JasonPekos/CppSplines/main/cubicanim.gif)
