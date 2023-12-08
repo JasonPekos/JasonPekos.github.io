@@ -188,3 +188,17 @@ td {
 table tbody tr td {
   border: 1px solid lightgray;
 }
+
+.profile-photo {
+  width: 50%; /* Adjust the width as needed */
+  margin: 0 auto; /* This centers the image and reduces whitespace */
+  display: block; /* Ensures the image is block-level */
+}
+
+.profile-photo-left-align {
+  width: auto;  /* Adjust width as needed */
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  float: left;  /* Aligns the image to the left */
+}
