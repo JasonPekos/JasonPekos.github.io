@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+   <link rel="stylesheet" href="/libs/katex/katex.min.css">
+     
    <link rel="stylesheet" href="/libs/highlight/github.min.css">
    
   <link rel="stylesheet" href="/css/franklin.css">
@@ -35,6 +36,78 @@
 <p>an <a href="https://en.wikipedia.org/wiki/Artificial_life &quot;Artificial life&quot;">artificial life</a> program, developed by <a href="https://en.wikipedia.org/wiki/Craig_Reynolds_&#40;computer_graphics&#41; &quot;Craig Reynolds &#40;computer graphics&#41;&quot;">Craig Reynolds</a> in 1986, which simulates the <a href="https://en.wikipedia.org/wiki/Flocking_&#40;behavior&#41; &quot;Flocking &#40;behavior&#41;&quot;">flocking</a> behaviour of <a href="https://en.wikipedia.org/wiki/Bird &quot;Bird&quot;">birds</a>, and related group motion.</p>
 </blockquote>
 <p>This blog covers a naive implementation of a Boids algorithm in Julia.</p>
+<hr />
+<h2 id="basic_idea"><a href="#basic_idea" class="header-anchor">Basic Idea.</a></h2>
+<p>We have some pre-defined number of objects — boids — in an arena of size <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>L</mi><mo separator="true">,</mo><mi>W</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(L, W)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">L</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="mclose">)</span></span></span></span>. These objects have some properties associated with them. Notably, position in the arena &#40;maybe something like <code>boid.posx</code>, <code>boid.posy</code>&#41; and velocity, &#40;maybe something like <code>boid.velx</code>, <code>boid.vely</code>&#41;.</p>
+<img src="/assets/boids/boids1excd.png" alt="">
+<p>We can create a mutable struct in Julia to represent each boid:</p>
+<pre><code class="julia hljs"><span class="hljs-keyword">mutable struct</span> Boid{T &lt;: <span class="hljs-built_in">Number</span>} <span class="hljs-comment"># To start</span>
+	vel::<span class="hljs-built_in">Vector</span>{T}
+	pos::<span class="hljs-built_in">Vector</span>{T}
+<span class="hljs-keyword">end</span>
+
+<span class="hljs-keyword">function</span> Boid(vel::<span class="hljs-built_in">Vector</span>{T}, pos::<span class="hljs-built_in">Vector</span>{T}) <span class="hljs-keyword">where</span> T &lt;: <span class="hljs-built_in">Number</span>
+	<span class="hljs-keyword">return</span> Boid{T}(vel, pos)
+<span class="hljs-keyword">end</span></code></pre>
+<p>As well as a struct for the arena:</p>
+<pre><code class="julia hljs"><span class="hljs-keyword">struct</span> Arena{T &lt;: <span class="hljs-built_in">Number</span>}
+	h::T
+	w::T
+<span class="hljs-keyword">end</span></code></pre>
+<p>Each boid updates it&#39;s position by taking at step in the direction of it&#39;s velocity vector:</p>
+<pre><code class="julia hljs"><span class="hljs-keyword">function</span> boid_position_update!(current_boid::Boid{T}, arena; δt = <span class="hljs-number">0.1</span>) <span class="hljs-keyword">where</span> {T &lt;: <span class="hljs-built_in">Number</span>}
+	
+	current_boid.pos[<span class="hljs-number">1</span>] = current_boid.pos[<span class="hljs-number">1</span>] + δt * current_boid.vel[<span class="hljs-number">1</span>])
+	
+	current_boid.pos[<span class="hljs-number">2</span>] = current_boid.pos[<span class="hljs-number">2</span>] + δt * current_boid.vel[<span class="hljs-number">2</span>])
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">nothing</span>
+<span class="hljs-keyword">end</span></code></pre>
+<p>If we initialize at some random distribution of initial position and velocities, the boids will slowly wander out of the arena:</p>
+<pre><code class="julia hljs">boids = [Boid(
+    [rand(Normal(<span class="hljs-number">0</span>, <span class="hljs-number">7</span>)), rand(Normal(<span class="hljs-number">0</span>, <span class="hljs-number">7</span>))], 
+    [rand(Uniform(<span class="hljs-number">0</span>, test_arena.w)), rand(Uniform(<span class="hljs-number">0</span>, test_arena.h))]
+) <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">1</span>:<span class="hljs-number">200</span>]</code></pre>
+<img src="/assets/boids/output3_excomp.mp4" alt="">
+<p>So instead of updating to:</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>x</mi><mi>t</mi></msub><mo>=</mo><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><mi>δ</mi><mi>t</mi><mo>⋅</mo><msub><mi>v</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">x_t = x_{t-1} + \delta t \cdot v_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>
+<p>We&#39;ll mod out the size of the arena, for example:</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>x</mi><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></msub><mo>=</mo><mi mathvariant="normal">mod</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><msub><mi>x</mi><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></msub><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow><mo>+</mo><mi>δ</mi><mi>t</mi><mo>⋅</mo><msub><mi>v</mi><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></msub><mo separator="true">,</mo><mtext>arena.h</mtext><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">x_{t(y)} = \operatorname{mod}\left(x_{t(y)}{t-1} + \delta t \cdot v_{t(y)}, \text{arena.h}\right)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7858em;vertical-align:-0.3552em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2052em;vertical-align:-0.3552em;"></span><span class="mop"><span class="mord mathrm">mod</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size1">(</span></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">1</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">arena.h</span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size1">)</span></span></span></span></span></span></span>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>x</mi><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></msub><mo>=</mo><mi mathvariant="normal">mod</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><msub><mi>x</mi><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></msub><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow><mo>+</mo><mi>δ</mi><mi>t</mi><mo>⋅</mo><msub><mi>v</mi><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></msub><mo separator="true">,</mo><mtext>arena.w</mtext><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">x_{t(y)} = \operatorname{mod}\left(x_{t(x)}{t-1} + \delta t \cdot v_{t(x)}, \text{arena.w}\right)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7858em;vertical-align:-0.3552em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2052em;vertical-align:-0.3552em;"></span><span class="mop"><span class="mord mathrm">mod</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size1">(</span></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">x</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">1</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">x</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">arena.w</span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size1">)</span></span></span></span></span></span></span>
+<p>This makes it more like a game of pac-man –- if we lose a boid along the edge of the screen, they&#39;ll pop back up, having wrapped around the opposite side. </p>
+<hr />
+<h1 id="boid_behaviour"><a href="#boid_behaviour" class="header-anchor">Boid Behaviour.</a></h1>
+<p>Most boid implementations seem to use the following rules:</p>
+<ol>
+<li><p>Boids have two nested detection ranges –- a &quot;vision range&quot;, and an &quot;avoidance range&quot;.</p>
+</li>
+<li><p>Inside the vision range, boids will steer towards other boids.</p>
+</li>
+<li><p>Inside the avoidance range, boids will steer away from other boids. </p>
+</li>
+<li><p>Inside the vision range, boids will try to match their velocity to those of the boids around them</p>
+</li>
+</ol>
+<p>Optionally, there are some other rules, e.g.</p>
+<ol>
+<li><p>Boids will steer to avoid walls.</p>
+</li>
+<li><p>Boids belong to different groups, and will only flock with &quot;friends&quot;</p>
+</li>
+<li><p>Boids will fly towards a target, or away from a predator.</p>
+</li>
+</ol>
+<p>and many more. This initial implementation focuses on mostly the first rules, with the addition of wall avoidance. </p>
+<h2 id="implementation_of_rules_one_two_three"><a href="#implementation_of_rules_one_two_three" class="header-anchor">Implementation of Rules One, Two, Three</a></h2>
+<p>Each boid struct is modified to include a parameter for detection range and avoidance range.</p>
+<pre><code class="julia hljs"><span class="hljs-keyword">mutable struct</span> Boid{T &lt;: <span class="hljs-built_in">Number</span>}
+    vel::<span class="hljs-built_in">Vector</span>{T}
+    pos::<span class="hljs-built_in">Vector</span>{T}
+    
+    detection_range::T
+    avoidance_range::T
+<span class="hljs-keyword">end</span></code></pre>
+<img src="/assets/boids/boids2excd.png" alt="">
+<p>&#40;WIP: Up to this point, just a trial to make sure my mp4 compression is working well with github pages&#41;</p>
 <div class="page-foot">
     JasonPekos. Last modified: December 18, 2023.
     Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
@@ -59,6 +132,11 @@
   </script>
   <!-- End collapsible button example -->
 </div><!-- CONTENT ENDS HERE -->
+    
+        
+
+
+
     
     
         
