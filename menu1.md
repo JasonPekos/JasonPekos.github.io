@@ -34,6 +34,12 @@ Way later
     - Tarone (1982): [Rat Tumor Hierarchical Model](/pages/BayesEx/BDA3/RatTumor/RT1)
 - Plotting HMC diagnostics (+ reparametrization) in Turing.jl: [here](/pages/neal)
 
+
+# Boids:
+(VERY WIP, trying to figure out the best way to serve animations in Franklin ATM.)
+
+- Boids 1: [Naive boids in Julia](/pages/Boids/boids1)
+
 # Troubleshooting stuff
 - Running ClusterMQ on Sharcnet via SSH: [here](/pages/scratchpad/cmq_sharc)
 - Installing `sf` or `geojsonio` on Sharcnet: [here](/pages/scratchpad/sf_sharc)
