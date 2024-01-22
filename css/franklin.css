@@ -5,8 +5,8 @@
 :root {
   --block-background: hsl(0, 0%, 94%);
   --output-background: hsl(0, 0%, 98%);
-  --small: 14px;
-  --normal: 19px;
+  --small: 13px;
+  --normal: 16px;
   --text-color: hsv(0, 0%, 20%);
 }
 
@@ -14,8 +14,33 @@
     DEFAULT FONT AND LAYOUT
 ================================================================== */
 
+@font-face {
+  font-family: 'Berkley Mono';
+  src: url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Regular.woff2') format('woff2'),
+       url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Berkley Mono';
+  src: url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Bold.woff2') format('woff2'),
+       url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Berkley Mono';
+  src: url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff2') format('woff2'),
+       url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff') format('woff');
+  font-weight: normal;
+  font-style: italic;
+}
+
+
 html {
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: 'Berkley Mono', monospace;
   font-size: var(--normal);
   color: var(--text-color);
 }
@@ -303,6 +328,7 @@ code {
 /* font-size: 90%; } */
 
 .hljs {
+  font-family: 'Berkley Mono', monospace;
   font-size: var(--small);
   line-height: 1.35em;
   border-radius: 10px;
