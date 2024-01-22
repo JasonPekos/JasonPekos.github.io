@@ -46,10 +46,11 @@ header .blog-name {
   width: 35%;
   display: inline-block;
   text-align: left;
-  font-size: 18px;
-  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 20px;
+  font-family: 'Berkley Mono', monospace;
   padding-top: 10px;
 }
+
 
 header .blog-name a {
   color: #a6a2a0;
