@@ -3,6 +3,8 @@
 ================================================================== */
 
 :root {
+  font-family: Inter, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
   --block-background: hsl(0, 0%, 94%);
   --output-background: hsl(0, 0%, 98%);
   --small: 13px;
@@ -10,16 +12,17 @@
   --text-color: hsv(0, 0%, 20%);
 }
 
+@supports (font-variation-settings: normal) {
+  :root { font-family: InterVariable, sans-serif; }
+}
+
 /* ==================================================================
     DEFAULT FONT AND LAYOUT
 ================================================================== */
 
 @font-face {
-  font-family: 'Berkley Mono';
-  src: url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Regular.woff2') format('woff2'),
-       url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
+  font-family: Inter;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
 }
 
 @font-face {

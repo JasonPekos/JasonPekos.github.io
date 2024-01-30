@@ -6,6 +6,13 @@ rss = "Jason Misc Stuff"
 +++
 @def tags = ["syntax", "code"]
 
+~~~
+<!-- HTML in your document's head -->
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+~~~
+
+
 <!-- 
 # Julia Bayes 
 ## Reparametrization in Turing.jl
