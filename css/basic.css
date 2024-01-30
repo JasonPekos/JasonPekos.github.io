@@ -47,7 +47,8 @@ header .blog-name {
   display: inline-block;
   text-align: left;
   font-size: 20px;
-  font-family: 'Berkley Mono', monospace;
+  font-family: Inter, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
   padding-top: 10px;
 }
 
