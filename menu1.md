@@ -61,7 +61,7 @@ Way later
 ~~~
 <div class="grid-container">
   <div class="grid-item">
-    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/boidstemp.png');"></div>
     <div class="grid-title" style="background: rgba(130,180,220,0.9);">Naive boids in Julia</div>
     <a href="/pages/Boids/boids1"></a>
   </div>
@@ -72,7 +72,7 @@ Way later
 ~~~
 <div class="grid-container">
   <div class="grid-item">
-    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/multitemp.png');"></div>
     <div class="grid-title" style="background: rgba(220,180,130,0.9);">Running ClusterMQ on Sharcnet via SSH</div>
     <a href="/pages/scratchpad/cmq_sharc"></a>
   </div>
