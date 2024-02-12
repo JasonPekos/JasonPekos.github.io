@@ -13,3 +13,9 @@
 \newcommand{\collaps}[2]{
 ~~~<button type="button" class="collapsible">~~~ #1 ~~~</button><div class="collapsiblecontent">~~~ #2 ~~~</div>~~~
 }
+
+\newcommand{\projectbox}[3]{"""
+<div class='grid'>
+  <p><a href='#2'>#3</a> #1 </p>
+</div>
+"""}

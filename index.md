@@ -1,7 +1,11 @@
 @def title = "Jason Pekos - Data Scientist"
 @def tags = ["Data Science", "Bayesian Statistics", "Machine Learning"]
 
-
+~~~
+<!-- HTML in your document's head -->
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+~~~
 
 # About me
 

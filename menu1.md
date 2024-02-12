@@ -35,25 +35,72 @@ Way later
 - Paintings  -->
 
 
-# Bayesian Modeling with PPLs:
-- Implementing classic analysis of laboratory datasets in various PPLs:
-    - Racine et al. (1986): [Bioassay Logistic Regression](/pages/BayesEx/BDA3/BioAssay1/bioassay1)
-    - Tarone (1982): [Rat Tumor Hierarchical Model](/pages/BayesEx/BDA3/RatTumor/RT1)
-- Plotting HMC diagnostics (+ reparametrization) in Turing.jl: [here](/pages/neal)
+# Bayesian Modeling with PPls:
 
+~~~
+<div class="grid-container">
+  <a href="/pages/BayesEx/BDA3/BioAssay1/bioassay1" class="grid-item">
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/bassay.png');"></div>
+    <div class="grid-title" style="background: rgba(120,180,120,0.9);">Bioassay Logistic Regression</div>
+  </a>
+  <a href="/pages/BayesEx/BDA3/RatTumor/RT1" class="grid-item">
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/rat1.png');"></div>
+    <div class="grid-title" style="background: rgba(180,120,120,0.9);">Rat Tumor Hierarchical Model</div>
+  </a>
+  <a href="/pages/neal" class="grid-item">
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/hmctemp.png');"></div>
+    <div class="grid-title" style="background: rgba(120,120,180,0.9);">Plotting HMC Diagnostics</div>
+  </a>
+  <!-- More grid items here -->
+</div>
 
-# Boids:
-(VERY WIP, trying to figure out the best way to serve animations in Franklin ATM.)
+~~~
 
-- Boids 1: [Naive boids in Julia](/pages/Boids/boids1)
+# Misc Stuff:
 
-# Troubleshooting stuff
-- Running ClusterMQ on Sharcnet via SSH: [here](/pages/scratchpad/cmq_sharc)
-- Installing `sf` or `geojsonio` on Sharcnet: [here](/pages/scratchpad/sf_sharc)
+~~~
+<div class="grid-container">
+  <div class="grid-item">
+    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-title" style="background: rgba(130,180,220,0.9);">Naive boids in Julia</div>
+    <a href="/pages/Boids/boids1"></a>
+  </div>
+</div>
+~~~
 
-@@colbox-blue
-# Temporary Viz Links - Climate Can
-- [PEI-1](/pages/climate-can/pei-1)
-- [Network](/pages/climate-can/visnet)
-- [ON gifs](/pages/climate-can/anim)
-@@
+# Troubleshooting stuff:
+~~~
+<div class="grid-container">
+  <div class="grid-item">
+    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-title" style="background: rgba(220,180,130,0.9);">Running ClusterMQ on Sharcnet via SSH</div>
+    <a href="/pages/scratchpad/cmq_sharc"></a>
+  </div>
+  <div class="grid-item">
+    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-title" style="background: rgba(130,220,180,0.9);">Installing `sf` or `geojsonio` on Sharcnet</div>
+    <a href="/pages/scratchpad/sf_sharc"></a>
+  </div>
+</div>
+~~~
+
+# Temporary Image Links - Climate Can For SSC 2023:
+~~~
+<div class="grid-container">
+  <div class="grid-item">
+    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-title" style="background: rgba(180,130,220,0.9);">PEI-1</div>
+    <a href="/pages/climate-can/pei-1"></a>
+  </div>
+  <div class="grid-item">
+    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-title" style="background: rgba(220,130,180,0.9);">Network</div>
+    <a href="/pages/climate-can/visnet"></a>
+  </div>
+  <div class="grid-item">
+    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-title" style="background: rgba(180,220,130,0.9);">ON gifs</div>
+    <a href="/pages/climate-can/anim"></a>
+  </div>
+</div>
+~~~
