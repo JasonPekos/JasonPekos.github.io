@@ -1,1 +1,1 @@
-nothing
+"/home/runner/work/JasonPekos.github.io/JasonPekos.github.io/__site/assets/pages/grobnerbasis/code/output/g4.svg"

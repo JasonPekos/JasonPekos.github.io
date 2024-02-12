@@ -8,7 +8,7 @@
   --block-background: hsl(0, 0%, 94%);
   --output-background: hsl(0, 0%, 98%);
   --small: 13px;
-  --normal: 16px;
+  --normal: 17px;
   --text-color: hsv(0, 0%, 20%);
 }
 
@@ -368,3 +368,53 @@ code {
   border-radius: 0 10px 10px 0;
   border-left: 5px solid #4c9cf1;
 }
+
+
+/* ==================================================================
+    GRID FOR PORTFOLIO
+================================================================== */
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.grid-item {
+  position: relative;
+  border: 2px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f9f9f9;
+  transition: transform 0.3s ease; /* Animation for the transform property */
+}
+
+.grid-image {
+  width: 100%;
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.grid-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 0;
+  color: whitesmoke;
+  text-align: center;
+  font-weight: bold;
+  /* existing styles */
+  color: white;
+  text-shadow: 
+    1px 1px 2px #555; /* soft shadow with a slight blur */
+  /* The background color will be added inline to allow for different colors */
+}
+
+.grid-item:hover {
+  transform: translateY(-5px); /* Moves the item up by 5px on hover */
+}
+

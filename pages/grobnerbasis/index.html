@@ -7,6 +7,8 @@
      
    <link rel="stylesheet" href="/libs/highlight/github.min.css">
    
+  <link rel="preconnect" href="https://rsms.me/"> <!-- Add this line for Inter font -->
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css"> <!-- Add this line for Inter font -->
   <link rel="stylesheet" href="/css/franklin.css">
   <link rel="stylesheet" href="/css/basic.css">
   <link rel="icon" href="/assets/favicon.png">
@@ -33,13 +35,13 @@
 <h1 id="general_strategy"><a href="#general_strategy" class="header-anchor">General strategy:</a></h1>
 <p>Consider a graph, e.g.</p>
 
-<p><span style="color:red;">// Image matching '/assets/pages/grobnerbasis/code/g1' not found. //</span></p>
+<img src="/assets/pages/grobnerbasis/code/output/g1.svg" alt="">
 <p>In general, we&#39;re going to use the <code>:circular</code> method for displaying graphs. This is because the other methods, e.g. <code>:stress</code> are stochastic, and they mess up the hack we&#39;re using to visualize walks on graphs. So the above graph changes to:</p>
 
-<p><span style="color:red;">// Image matching '/assets/pages/grobnerbasis/code/g2' not found. //</span></p>
+<img src="/assets/pages/grobnerbasis/code/output/g2.svg" alt="">
 <p>This looks a little odd, but it&#39;s still the same graph we looked at yesterday. We can easily sample a random walk on this graph from a fixed starting point, e.g. a random walk of length <code>4</code> is shown below:</p>
 
-<p><span style="color:red;">// Image matching '/assets/pages/grobnerbasis/code/g3' not found. //</span></p>
+<img src="/assets/pages/grobnerbasis/code/output/g3.svg" alt="">
 <p>We&#39;re going to sample a random walk of length <code>n</code> for <code>n</code> large, e.g. <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn><msup><mn>0</mn><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mn>000</mn></mrow><annotation encoding="application/x-tex">100&#x27;000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7519em;"></span><span class="mord">10</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mord">000</span></span></span></span> or whatever. From this, we&#39;re going to get out a vector of visited nodes, e.g. <code>&#91;1 2 3 2 1 ...&#93;</code>. We&#39;re going to loop over this vector, returning every primitive even walk that is a subset of this larger walk. Explicitly:</p>
 <pre><code class="julia hljs"><span class="hljs-keyword">function</span> extractevenwalks(walk::<span class="hljs-built_in">Vector</span>{<span class="hljs-built_in">Int64</span>})
     <span class="hljs-comment"># This set will store all of our simple even walks. </span>
@@ -92,14 +94,14 @@
 <p>This code doesn&#39;t accept walks which traverse back along edges we&#39;ve already visited. We can test this out on the above graph with a walk of length <code>40</code>:</p>
 <pre><code class="julia hljs">n = <span class="hljs-number">40000</span>
 rw = randomwalk(simple_graph_1, <span class="hljs-number">1</span>, n) <span class="hljs-comment"># start at node 1, walk of length n</span></code></pre>
-<pre><code class="plaintext hljs">UndefVarError: `randomwalk` not defined
+<pre><code class="plaintext hljs">ewset = extractevenwalks(rw) = Set(Any[[1, 3, 4, 5, 3, 2, 1]])
 </code></pre>
 <p>Which can be plotted as:</p>
 
-<p><span style="color:red;">// Image matching '/assets/pages/grobnerbasis/code/g4' not found. //</span></p>
+<img src="/assets/pages/grobnerbasis/code/output/g4.svg" alt="">
 <p>Which is the desired result. </p>
 <div class="page-foot">
-    JasonPekos. Last modified: January 30, 2024.
+    JasonPekos. Last modified: February 12, 2024.
     Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
 </div>
 
