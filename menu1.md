@@ -60,47 +60,42 @@ Way later
 
 ~~~
 <div class="grid-container">
-  <div class="grid-item">
+  <a href="/pages/Boids/boids1" class="grid-item">
     <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/boidstemp.png');"></div>
     <div class="grid-title" style="background: rgba(130,180,220,0.9);">Naive boids in Julia</div>
-    <a href="/pages/Boids/boids1"></a>
-  </div>
+  </a>
 </div>
+
 ~~~
 
 # Troubleshooting stuff:
 ~~~
 <div class="grid-container">
-  <div class="grid-item">
+  <a href="/pages/scratchpad/cmq_sharc" class="grid-item">
     <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/multitemp.png');"></div>
     <div class="grid-title" style="background: rgba(220,180,130,0.9);">Running ClusterMQ on Sharcnet via SSH</div>
-    <a href="/pages/scratchpad/cmq_sharc"></a>
-  </div>
-  <div class="grid-item">
-    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+  </a>
+  <a href="/pages/scratchpad/sf_sharc" class="grid-item">
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/geojsontemp.png');"></div>
     <div class="grid-title" style="background: rgba(130,220,180,0.9);">Installing `sf` or `geojsonio` on Sharcnet</div>
-    <a href="/pages/scratchpad/sf_sharc"></a>
-  </div>
+  </a>
 </div>
 ~~~
 
 # Temporary Image Links - Climate Can For SSC 2023:
 ~~~
 <div class="grid-container">
-  <div class="grid-item">
-    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+  <a href="/pages/climate-can/pei-1" class="grid-item">
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/peitempcopy.png');"></div>
     <div class="grid-title" style="background: rgba(180,130,220,0.9);">PEI-1</div>
-    <a href="/pages/climate-can/pei-1"></a>
-  </div>
-  <div class="grid-item">
-    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+  </a>
+  <a href="/pages/climate-can/visnet" class="grid-item">
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/networktemp.png');"></div>
     <div class="grid-title" style="background: rgba(220,130,180,0.9);">Network</div>
-    <a href="/pages/climate-can/visnet"></a>
-  </div>
-  <div class="grid-item">
+  </a>
+  <a href="/pages/climate-can/anim" class="grid-item">
     <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
     <div class="grid-title" style="background: rgba(180,220,130,0.9);">ON gifs</div>
-    <a href="/pages/climate-can/anim"></a>
-  </div>
+  </a>
 </div>
 ~~~
