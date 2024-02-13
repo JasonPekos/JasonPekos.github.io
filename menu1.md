@@ -94,7 +94,7 @@ Way later
     <div class="grid-title" style="background: rgba(220,130,180,0.9);">Network</div>
   </a>
   <a href="/pages/climate-can/anim" class="grid-item">
-    <div class="grid-image" style="background-image: url('/path/to/your-thumbnail.jpg');"></div>
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/weatheron.png');"></div>
     <div class="grid-title" style="background: rgba(180,220,130,0.9);">ON gifs</div>
   </a>
 </div>
