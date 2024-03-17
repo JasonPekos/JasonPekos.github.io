@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+   <link rel="stylesheet" href="/libs/highlight/github.min.css">
+   
+  <link rel="preconnect" href="https://rsms.me/"> <!-- Add this line for Inter font -->
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css"> <!-- Add this line for Inter font -->
+  <link rel="stylesheet" href="/css/franklin.css">
+  <link rel="stylesheet" href="/css/basic.css">
+  <link rel="icon" href="/assets/favicon.png">
+   <title>mixtures1.md</title>  
+  
+</head>
+<body>
+  <header>
+<div class="blog-name"><a href="/">Jason Pekos</a></div>
+<nav>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/menu1/">Projects & Blog</a></li>
+    <li><a href="/menu2/">Contact</a></li>
+    <li><a href="/menu3/">Teaching</a></li>
+  </ul>
+  <img src="/assets/hamburger.svg" id="menu-icon">
+</nav>
+</header>
+
+
+<!-- Content appended here -->
+<div class="franklin-content">
+<h1 id="mixture_models_for_the_old_faithful_dataset"><a href="#mixture_models_for_the_old_faithful_dataset" class="header-anchor">Mixture Models For The Old Faithful Dataset</a></h1>
+<p>The Old Faithful dataset is a pretty classic mixture model example &#40;see, e.g. Bishop PRML&#41;. There are a couple  of different version of this –- I&#39;ll use the one from the <code>RDatasets.jl</code> package.</p>
+<pre><code class="julia hljs">old_faithful = dataset(<span class="hljs-string">&quot;datasets&quot;</span>, <span class="hljs-string">&quot;faithful&quot;</span>)</code></pre>
+<p>We can plot the data:</p>
+<h2 id="eda"><a href="#eda" class="header-anchor">EDA</a></h2>
+<img src="/assets/oldfaithful/p1.svg" alt="">
+<button type="button" class="collapsible">  <strong>Click Me</strong> For Plotting Code </button><div class="collapsiblecontent">  </p>
+<pre><code class="julia hljs">l = <span class="hljs-meta">@layout</span> [a{<span class="hljs-number">0.7</span>w} b{<span class="hljs-number">0.3</span>w}; c{<span class="hljs-number">0.7</span>h} d{<span class="hljs-number">0.3</span>h}]
+
+<span class="hljs-comment"># Main scatter plot</span>
+p1 = scatter(old_faithful.Eruptions, 
+             old_faithful.Waiting,
+             color = <span class="hljs-number">3</span>,
+             legend = <span class="hljs-literal">false</span>,
+             xlabel = <span class="hljs-string">&quot;Eruption time (minutes)&quot;</span>,
+             ylabel = <span class="hljs-string">&quot;Waiting time (minutes)&quot;</span>);
+
+<span class="hljs-comment"># Horizontal histogram for waiting time</span>
+p2 = histogram(old_faithful.Waiting, 
+               color = <span class="hljs-number">3</span>, 
+               orientation = :horizontal,
+               legend = <span class="hljs-literal">false</span>,
+               title = <span class="hljs-string">&quot;&quot;</span>,
+               bins = <span class="hljs-number">30</span>,
+               ylims = (minimum(old_faithful.Waiting), maximum(old_faithful.Waiting)),
+               yaxis = <span class="hljs-literal">false</span>,
+               xaxis = <span class="hljs-literal">false</span>);
+
+<span class="hljs-comment"># Upside-down histogram for eruption time</span>
+p3 = histogram(old_faithful.Eruptions,
+               color = <span class="hljs-number">3</span>,
+               title = <span class="hljs-string">&quot;&quot;</span>,
+               yflip = <span class="hljs-literal">true</span>,
+               xlims = (minimum(old_faithful.Eruptions), maximum(old_faithful.Eruptions)),
+               yaxis = <span class="hljs-literal">false</span>,
+               xaxis = <span class="hljs-literal">false</span>,
+               bins = <span class="hljs-number">30</span>,
+               legend = <span class="hljs-literal">false</span>);
+
+<span class="hljs-comment"># Placeholder for alignment </span>
+p4 = plot(legend = <span class="hljs-literal">false</span>, axis = <span class="hljs-literal">false</span>, grid = <span class="hljs-literal">false</span>, foreground_color_subplot=:white);
+
+<span class="hljs-comment"># Combine plots with adjusted layout</span>
+plot(p1, p2, p3, p4, layout = l, size=(<span class="hljs-number">600</span>, <span class="hljs-number">600</span>))</code></pre>
+<p><strong>Note:</strong> As of <code>Plots.jl</code> version <code>1.39.0</code>, <code>orientation &#61; :horizontal</code> does not swap the xlims, so you need to do this manually. </div>
+<h2 id="model_one_1d_mixture_model"><a href="#model_one_1d_mixture_model" class="header-anchor">Model One: 1D Mixture Model</a></h2>
+<p>Let&#39;s implement a simple one-dimensional mixture of Gaussians for the eruption time data:</p>
+
+<div class="page-foot">
+    JasonPekos. Last modified: March 17, 2024.
+    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
+</div>
+
+<!-- Collapsible button example -->
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+    
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      });
+    }
+  </script>
+  <!-- End collapsible button example -->
+</div><!-- CONTENT ENDS HERE -->
+    
+    
+        
+
+
+    
+  </body>
+</html>
