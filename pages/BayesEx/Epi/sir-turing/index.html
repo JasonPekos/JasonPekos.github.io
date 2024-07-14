@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="/libs/katex/katex.min.css">
+     
+   <link rel="stylesheet" href="/libs/highlight/github.min.css">
+   
+  <link rel="preconnect" href="https://rsms.me/"> <!-- Add this line for Inter font -->
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css"> <!-- Add this line for Inter font -->
+  <link rel="stylesheet" href="/css/franklin.css">
+  <link rel="stylesheet" href="/css/basic.css">
+  <link rel="icon" href="/assets/favicon.png">
+   <title>bio1np.md</title>  
+  
+</head>
+<body>
+  <header>
+<div class="blog-name"><a href="/">Jason Pekos</a></div>
+<nav>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/menu1/">Projects & Blog</a></li>
+    <li><a href="/menu2/">Contact</a></li>
+    <li><a href="/menu3/">Teaching</a></li>
+  </ul>
+  <img src="/assets/hamburger.svg" id="menu-icon">
+</nav>
+</header>
+
+
+<!-- Content appended here -->
+<div class="franklin-content">
+<h1 id="inference_for_discrete_time_epidemic_models_in_julia"><a href="#inference_for_discrete_time_epidemic_models_in_julia" class="header-anchor">Inference for Discrete Time Epidemic Models in Julia</a></h1>
+<p>The SIR model is a classic &#40;maybe <em>the classic</em>&#41; example of a <a href="&#40;https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology&#41;">compartment model</a> in epidemiology. Compartment models treat epidemics as a series of flows between compartments:</p>
+<img src="/assets/epi/sir-draw.png" alt="">
+<p>Traditionally, the corresponding mathematical model is given as an ODE:</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd class ="mtr-glue"></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mfrac><mrow><mi>d</mi><mi>S</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mo>−</mo><mfrac><mrow><mi>β</mi><mi>S</mi><mi>I</mi></mrow><mi>N</mi></mfrac></mrow></mstyle></mtd><mtd class ="mtr-glue"></mtd><mtd class ="mml-eqn-num"></mtd></mtr><mtr><mtd class ="mtr-glue"></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mfrac><mrow><mi>d</mi><mi>I</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mi>β</mi><mi>S</mi><mi>I</mi></mrow><mi>N</mi></mfrac><mo>−</mo><mi>γ</mi><mi>I</mi></mrow></mstyle></mtd><mtd class ="mtr-glue"></mtd><mtd class ="mml-eqn-num"></mtd></mtr><mtr><mtd class ="mtr-glue"></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mfrac><mrow><mi>d</mi><mi>R</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mi>γ</mi><mi>I</mi></mrow></mstyle></mtd><mtd class ="mtr-glue"></mtd><mtd class ="mml-eqn-num"></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+\frac{dS}{dt} &amp;= -\frac{\beta SI}{N} \\
+\frac{dI}{dt} &amp;= \frac{\beta SI}{N} - \gamma I \\
+\frac{dR}{dt} &amp;= \gamma I
+\end{align}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:7.0723em;vertical-align:-3.2862em;"></span><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.7862em;"><span style="top:-5.7862em;"><span class="pstrut" style="height:3.3714em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-3.4287em;"><span class="pstrut" style="height:3.3714em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-1.0713em;"><span class="pstrut" style="height:3.3714em;"></span><span class="mord"><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.2862em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.7862em;"><span style="top:-5.7862em;"><span class="pstrut" style="height:3.3714em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord">−</span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">βS</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-3.4287em;"><span class="pstrut" style="height:3.3714em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">βS</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span><span style="top:-1.0713em;"><span class="pstrut" style="height:3.3714em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.2862em;"><span></span></span></span></span></span></span></span><span class="tag"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:3.7862em;"><span style="top:-5.7862em;"><span class="pstrut" style="height:3.3714em;"></span><span class="eqn-num"></span></span><span style="top:-3.4287em;"><span class="pstrut" style="height:3.3714em;"></span><span class="eqn-num"></span></span><span style="top:-1.0713em;"><span class="pstrut" style="height:3.3714em;"></span><span class="eqn-num"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.2862em;"><span></span></span></span></span></span></span></span></span>
+<p>This approach has many benefits, especially with respect to inference. Unfortunately, these deterministic models can seriously underestimate uncertainty, especially when population sizes are small &#40;see e.g. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4426634/">King et al 2015</a>&#41;.</p>
+<p>With this in mind, I&#39;d like to get inference for a discrete, stochastic version of this model working in Julia. Again, unfortunately, inference for these models can be tricky:</p>
+<ol>
+<li><p>The inclusion of discrete latent states makes inference with gradient based samples — e.g. HMC and NUTS — impossible &#40;caveat: <a href="https://www.biorxiv.org/content/10.1101/110767v2.full.pdf">Li 2017</a>, but I discuss this later&#41;.</p>
+</li>
+<li><p>The state space model here is non-linear and non-Gaussian, so the types of filtering methods we can use to compute pseudo-marginals &#40;if we go that route&#41; are restricted.</p>
+</li>
+<li><p>The parameter space itself –- e.g. the slice of the posterior composed of just &#40;<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>, <code>prop_sus</code>, <code>init_inf</code>, ...&#41; can exhibit poor geometry for many MCMC samplers.</p>
+</li>
+</ol>
+<h2 id="a_turing_model"><a href="#a_turing_model" class="header-anchor">A Turing Model</a></h2>
+<p>Let&#39;s focus on &#40;nearly&#41; the simplest case of &#40;nearly&#41; the simplest model. We restrict our inference to just <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span> and the latent estimates, fixing <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span> and <code>\prop_rep</code> to scalar values, and initial infections to one.</p>
+<h3 id="making_some_data"><a href="#making_some_data" class="header-anchor">Making some data</a></h3>
+<pre><code class="julia hljs"><span class="hljs-meta">@model</span> <span class="hljs-keyword">function</span> SIR(daily_inf, pop)
+    <span class="hljs-comment"># Parameters</span>
+    β ~ LogNormal(log(<span class="hljs-number">0.2</span>), <span class="hljs-number">0.02</span>)
+    γ = <span class="hljs-number">0.1</span>
+    prop_rep = <span class="hljs-number">0.8</span>
+
+    <span class="hljs-comment"># Initialize States</span>
+    T = length(daily_inf)
+    S = tzeros(T + <span class="hljs-number">1</span>)
+    I = tzeros(T + <span class="hljs-number">1</span>)
+    R = tzeros(T + <span class="hljs-number">1</span>)
+
+    S[<span class="hljs-number">1</span>] += pop - <span class="hljs-number">1</span>
+    I[<span class="hljs-number">1</span>] += <span class="hljs-number">1</span>
+    
+    infections = <span class="hljs-built_in">Vector</span>{<span class="hljs-built_in">Int</span>}(<span class="hljs-literal">undef</span>, T) <span class="hljs-comment"># Allocate space for inferred infections</span>
+    recoveries = <span class="hljs-built_in">Vector</span>{<span class="hljs-built_in">Int</span>}(<span class="hljs-literal">undef</span>, T) <span class="hljs-comment"># Allocate space for inferred recoveries</span>
+    
+    <span class="hljs-comment"># Process Simulation</span>
+    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-number">1</span>:T
+        infection_prob = -expm1(-β*I[t]/ (S[t] + I[t] + R[t]))
+        recovery_prob = -expm1(-γ)
+        
+        infections[t] ~ Binomial(S[t], infection_prob)
+        recoveries[t] ~ Binomial(I[t], recovery_prob)
+
+        S[t+<span class="hljs-number">1</span>] = S[t] - infections[t]
+        I[t+<span class="hljs-number">1</span>] = I[t] + infections[t] - recoveries[t]
+        R[t+<span class="hljs-number">1</span>] = R[t] + recoveries[t]
+
+        <span class="hljs-comment"># Likelihood of observed infections</span>
+        daily_inf[t] ~ Binomial(infections[t], prop_rep)
+    <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span></code></pre>
+<p>We want some data to fit this to, and there&#39;s no nicer data than data from the prior&#33;</p>
+<pre><code class="julia hljs">model = SIR(zeros(<span class="hljs-number">100</span>), <span class="hljs-number">500</span>) <span class="hljs-comment"># 100 timesteps, 500 pop.</span>
+prior_chain = sample(model, Prior(), <span class="hljs-number">100</span>) <span class="hljs-comment"># 100 prior samples</span></code></pre>
+<p>This gives us a chain with <code>1 &#43; 2*len&#40;dat&#41;</code> parameters –- Beta, and then latent infections &#40;<code>infections&#91;t&#93;&#41;</code>&#41; and recoveries &#40;<code>recoveries&#91;t&#93;</code>&#41;. We&#39;d like these infections and recoveries in a vector for plotting, so lets make a quick function to parse the chain into a nicer form:</p>
+<pre><code class="julia hljs"><span class="hljs-keyword">function</span> parse_chain(chain, index)
+    s = DataFrame(chain)[index, :]
+    inf_array = <span class="hljs-built_in">Vector</span>(group(chain, :infections).value[index, :])
+    rec_array = <span class="hljs-built_in">Vector</span>(group(chain, :recoveries).value[index, :])
+
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Dict</span>(:β =&gt; s[:β],
+                :infections =&gt; inf_array,
+                :init_vector =&gt; [s[:β], inf_array..., rec_array...])
+<span class="hljs-keyword">end</span></code></pre>
+<p>And finally, let&#39;s plot the data:</p>
+<pre><code class="julia hljs">plot(data[:infections], theme = :wong2, legend = :<span class="hljs-literal">false</span>, alpha = :<span class="hljs-number">0.3</span>);
+scatter!(data[:infections], legend = :<span class="hljs-literal">false</span>, color = <span class="hljs-number">1</span>);
+title!(<span class="hljs-string">&quot;Daily Infection Data&quot;</span>)</code></pre>
+<img src="/assets/epi/datplot1.png" alt="">
+<p>Sure, looks good.</p>
+<h3 id="inference_attempt_one"><a href="#inference_attempt_one" class="header-anchor">Inference Attempt One</a></h3>
+<p>Ok, we have the model, we have the data — let&#39;s try conditioning the model on the data&#33;</p>
+<div class="page-foot">
+    JasonPekos. Last modified: July 14, 2024.
+    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
+</div>
+
+<!-- Collapsible button example -->
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+    
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      });
+    }
+  </script>
+  <!-- End collapsible button example -->
+</div><!-- CONTENT ENDS HERE -->
+    
+        
+
+
+
+    
+    
+        
+
+
+    
+  </body>
+</html>
