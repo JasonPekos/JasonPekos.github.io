@@ -51,6 +51,10 @@ Way later
     <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/hmctemp.png');"></div>
     <div class="grid-title" style="background: rgba(120,120,180,0.9);">Plotting HMC Diagnostics</div>
   </a>
+  <a href="/pages/BayesEx/Epi/sir-turing/" class="grid-item">
+    <div class="grid-image" style="background-image: url('/assets/portfolio-thumbnails/epi_temp.png');"></div>
+    <div class="grid-title" style="background: rgba(120,120,180,0.9);">Stochastic Epidemic Models</div>
+  </a>
   <!-- More grid items here -->
 </div>
 
