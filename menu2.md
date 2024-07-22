@@ -11,4 +11,4 @@
 `pekosj (at) mcmaster (dot) ca` or `first.last@gmail.com`
 
 # Also check out:
-[www.amybell.info](www.amybell.info)
+www.amybell.info
