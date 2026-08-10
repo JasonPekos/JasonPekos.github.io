@@ -6,12 +6,19 @@
 
 @def mintoclevel = 2
 
-@def ignore = ["node_modules/", "franklin", "franklin.pub"]
+@def ignore = ["node_modules/", "franklin", "franklin.pub", "bandit-mmm/", "bandit-mmm-codex/"]
+
+<!-- theme: pages opt in to a template-rendered masthead with
+     @def showmasthead = true (+ title / kicker / dek / metaline vars) -->
+@def showmasthead = false
 
 \newcommand{\R}{\mathbb R} \newcommand{\scal}[1]{\langle #1 \rangle}
 
+<!-- \collaps renders as a native <details> element -->
 \newcommand{\collaps}[2]{
-~~~<button type="button" class="collapsible">~~~ #1 ~~~</button><div class="collapsiblecontent">~~~ #2 ~~~</div>~~~
+~~~<details><summary>~~~ #1 ~~~</summary>~~~
+#2
+~~~</details>~~~
 }
 
 \newcommand{\projectbox}[3]{"""
