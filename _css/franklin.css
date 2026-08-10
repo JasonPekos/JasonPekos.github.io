@@ -250,7 +250,11 @@ tbody th { font-weight: 600; padding-right: 1rem; }
 .topnav a.navlink[aria-current="page"] { color: var(--ink); border-bottom-color: var(--rule-strong); }
 .topnav a.navlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
 @media (max-width: 30rem) {
-  .topnav { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+  .topnav { flex-direction: column; align-items: flex-start; gap: 0.6rem;
+            padding-top: 1.2rem; padding-bottom: 1.1rem; }
+  /* stacked: no shared baseline with the brand, so no optical nudge;
+     full-width ul so the theme button's auto margin right-aligns it */
+  .topnav ul { transform: none; width: 100%; row-gap: 0.5rem; }
 }
 
 /* ---- masthead & meta ---- */
@@ -285,7 +289,7 @@ hr::after { content: "\2767"; position: absolute; top: 50%; left: 50%;
                                                counter-increment: item;
                                                font-size: 0.875em; font-weight: 500; }
 
-footer.colophon { margin-top: 4rem; padding-top: 1.2rem; padding-bottom: 4rem; color: var(--muted);
+footer.colophon { margin-top: calc(var(--leading) * 2); padding-top: 1.2rem; padding-bottom: 4rem; color: var(--muted);
                   font-size: var(--f-caption); }
 footer.colophon .rule-top { border-top: 1px solid var(--rule); padding-top: 1.2rem; max-width: 100%; }
 
