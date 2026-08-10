@@ -5,87 +5,398 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   
-  <link rel="preconnect" href="https://rsms.me/"> <!-- Add this line for Inter font -->
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css"> <!-- Add this line for Inter font -->
   <link rel="stylesheet" href="/css/franklin.css">
-  <link rel="stylesheet" href="/css/basic.css">
+  <!-- restore an explicitly chosen dark theme before first paint;
+       light stays the default (no stored choice, no OS preference) -->
+  <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
   <link rel="icon" href="/assets/favicon.png">
-   <title>Jason Pekos - Data Scientist</title>  
-  
+  <title>Jason Pekos</title>
 </head>
 <body>
-  <header>
-<div class="blog-name"><a href="/">Jason Pekos</a></div>
-<nav>
+<nav class="topnav" aria-label="Site">
+  <pre class="ocean" id="oceanBar" aria-hidden="true"></pre>
+  <a class="brand" href="/">Jason Pekos</a>
   <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/menu1/">Projects & Blog</a></li>
-    <li><a href="/menu2/">Contact</a></li>
-    <li><a href="/menu3/">Teaching</a></li>
+    <li><a class="navlink" href="/">Home</a></li>
+    <li><a class="navlink" href="/menu1/">Projects &amp; Blog</a></li>
+    <li><a class="navlink" href="/menu2/">Contact</a></li>
+    <li><a class="navlink" href="/menu3/">Teaching</a></li>
+    <li><button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle colour theme" aria-pressed="false">◐ theme</button></li>
   </ul>
-  <img src="/assets/hamburger.svg" id="menu-icon">
 </nav>
-</header>
 
 
-<!-- Content appended here -->
+
+
+<!-- Franklin wraps the page content in .franklin-content itself -->
 <div class="franklin-content">
-<!-- HTML in your document's head -->
-<link rel="preconnect" href="https://rsms.me/">
-<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<div class="hero">
+    <div class="hero-text">
+      <p><b>Currently:</b> I lead the modelling team at <a href="https://getrecast.com">Recast Labs Inc</a>, where I work on problems related to efficient gaussian-process approximations inside HMC, causal inference, and validation methods for computationally expensive Bayesian models.</p>
+      <p>I'm broadly interested in computational statistics, probabilistic programming systems, procedural art, Julia, and cross-country skiing.</p>
+      <p>I may <a href="/menu1/">blog here</a> occasionally on those or other topics!</p>
+      <p><b>Formerly:</b> I completed my M.Sc. at McMaster under <a href="https://math.mcmaster.ca/~bolker/">Prof. Ben Bolker</a> in June 2023, specialising in inference for stochastic state-space models of historical plagues.</p>
+    </div>
 
-<h1 id="about_me"><a href="#about_me" class="header-anchor">About me</a></h1>
-<p>
-<div class="row">
-  <div class="container">
-    <img class="left" src="/assets/profilephoto.JPG" style="width:40%;">
-    <p>
-    I'm interested in <strong>Computational methods for Bayesian inference</strong>, <strong>Machine Learning</strong>, probabilistic programming systems, Julia, and cross country skiing.
-    </p>
-    <div style="clear: both"></div>      
+    <figure class="portrait-fig">
+      <div class="portrait-wrap" id="portraitWrap" title="hover: the data · click: the program">
+        <pre class="ascii-fig overlaid" id="asciiPortrait" role="img" aria-label="ASCII portrait of Jason Pekos, animated through posterior samples" data-src="#asciiPortrait-src" data-seed="20260713">                                                        
+                                         ```            
+                                        `-----.`        
+                                       `-------:--`  `.-
+`````````````````````                  .---::::::::--::-
+```````........-----...```````        `---::::::::::::::
+..--::::::::::::::::-----..``..```` ``----::-:::::::::::
+:::::::::::-:::::::-.-..`      .------:-::::::::::::::::
+:::::::::::::::::.``.`.:!:-.`` `..-:::::::::::::::::::::
+:::::::::::::::::``.`.!=@MM@g%%g!-````.:::::::::::::::::
+::::::--:::::::::.``::-:=!:---:@Mg-``.--::::::::::::::::
+::::::--:::::::::.`.g!--:::----wMMw:.-:-::::::::::::::::
+::::::::::::::::::..%=::=!!=w=!!MM@!-::::::-::::::::::::
+::::::::::::::::::`!W!=g@w:g%w!-wMW--:::::::::::::!!===!
+::::::::::::::::::-wM-.:!--:=:--=M%-::::::::::::!=wwgwww
+:!::::::::::::::::.:%:-wgwg@W@g=%W=:::!=====wwwwgggggggw
+!!!!!!!::::::::::::::ww%@gggg@MMMw::!=ww==wwgggggggggg%%
+!!!!!!!!!!:::::::::!:-%MW!=gwWMM@-:!wwwwwwwgggggg%%%gg%%
+!!!!!!!!!!:::::::::::.`=WMMMMMM%!!!wwwwwwgggg%%g%%gg%%%%
+!!!!!!!!!!!!!:!!!!!!:--.:!=g%w=wgW%!!wgwwgggggg%%%%gg%%%
+w=ww======!!!:!!!!:-`.g=:::!==wg@gw!---!wgg%ggg%%gggg%%%
+gwwwwwww===!!!!:-:!::::gg=!=ww%@@%gww!:..-!wg%%%%ggg%%%g
+wwwwwwww==ww=:--:=w!=:wMMW@%gg%WM%gww====:--:g%%%ggg%%gg
+ggwwwwwwwwg!..-!gwg!wg%%@@@@@WWW%ggwww=ggwww!!%ggggg%ggg
+ggwwwwwwwww-:!=w%%g!ww=wwwg%@%gggwwwwgwggg@gg!wgggggggg%
+ggggggwwww!-=gwg@g=ww=w=wwggggggwwwwwwg%@@@%%w=g%ggggggg
+gggggwww=w::=g%@g==w=ww=wg%ggggwwwgggg%%@WW@@gwg%ggggggg
+gggggwwwww==wg%@=wgww==wwg%%%ggwwwwwgg%%%MWW%%gg%ggggggg
+gggwwwwwwwwg=g%@===gw=wwg%@%%g@g%%@%%%gg%MW%@%ww%g%g%%w=
+%%gwwwwwwg=g%w@@==g%%gg%@@W%g%@%%%%%WMMMMM%@@@%wg%%%%%%w
+@%gg%gggg%!=@W@M@g%%@gg@@WM@%@WMW@@@WMMMMM@WWWWg%@WWWW%g</pre><script type="application/json" id="asciiPortrait-src">{"v": 1, "kind": "gibbs", "cols": 56, "rows": 31, "glyphs": " `.-:!=wg%@WM", "ink": [0.0, 0.0833, 0.1667, 0.25, 0.3333, 0.4167, 0.5, 0.5833, 0.6667, 0.75, 0.8333, 0.9167, 1.0], "kappa": 0.06, "cells": 48, "interval": 110,
+"field":[
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000050909040100000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000111252626232115080301000000000103",
+"0303040403040403040404040404040302010101010101000001010101010101020201010101010825262828282828292722120403071423",
+"0505050505050505050505050708070808081009050404040303030302020202020202020201042027272830302929303031312828292928",
+"0505060708081216181816141718202222212221161413100706060505050404040302020202082428272930292931313130303030302929",
+"2020252729303334333131302930333129293030272324262320151011151310090705040510212627282929272931313132313232333331",
+"3332323333323231313030282932343330312921192318141102030301000414242824222428292829313131303031323233323333333433",
+"3535343433322929303233293034343334200812161018344435261611050307142028313130303030313132323131323333333334343433",
+"3736353534332930323434313234353432060717111940527999998066747763412207050909142930293031313231323333343434343433",
+"3536353432312728323433333333343434190612303225354743292525243383997024070617242830303031313233323333333535343435",
+"3032343432312827303233333434343534201013694021232933302624222254999655301325292829302930313131333333333435353434",
+"3635353535353230333333333332323433311417744730334644405060504139979981382429333231302928303130303334333434353534",
+"3434333435363532333535353535333032361241924546658356356772604227559987262435353433313030303031303033384549484844",
+"3536353333343535353636353637363535362659992317314125233747352621539977273034353535343435363632344050616162595757",
+"3738373636353333333435363637373735361831753523556859668590866247769252313434445150505353596154576565626667666459",
+"3940393939393837363535343334353637363134366158788064636669809899965636374150565853535561666970676464667069707271",
+"4141404040403939383837363635343434363738302377998743536759949999842433415461595854556166676770666771727270707273",
+"4140404040404039393837373737373736353535361808479398959999999578403944566061605658626668707172707272707072737375",
+"4142434544414040393838393837383838383938372122192940506271595157658774394560636058636769707068727473726968737575",
+"5553565752504948474640383837383840383426111862533131303951505468806457392422263855656971707070727269676767717575",
+"6259595758585957525147444141413726314330293334696952445054577279827667605840351715254056707274737167656973727270",
+"6160605858585958535054575135262134486138503554999991797570707589997770616151534947352624326974737170687075746967",
+"6764595757575655575862411819274164576742586273767981838283889388746264605958516766575455393972686766696872696869",
+"6764616058605858585854233744475874716745595452545961647782776666625757565662567070677968644155656769666468666673",
+"6366666464645857555639285264576879685255555354526058676262686262585858586060677679808476736050697270666465666669",
+"6965646766595554535536374964728164525361525656536162716464646460606162646567757882928882816961687269696565696966",
+"6365696662595555565547495464778553576258545252556165727371636654575659616268767374989288747862627269696667706664",
+"6569686059595656565760685367778147475162545054556478797774698169747579787673686372999276797860557169716872726149",
+"7373635654576160596346707461817946506272746565748281887569728477777478788799999899997681858371556571747173747259",
+"8076706972656867707641468688819984627275826763808290998473819295898282859399999999968690929391707886888893917267"
+]}
+</script>
+        <div class="photo-reveal" aria-hidden="true"><img id="portraitPhoto" alt="" loading="lazy"></div>
+        <div class="code-reveal" aria-label="The Turing.jl model this portrait is a posterior of">
+<pre><code><span class="hljs-meta">@model</span> <span class="hljs-keyword">function</span> ascii_model(D, n_cells, n_chars)
+    σ ~ Exponential(50.0)
+    inv2σ2 = 1.0 / (2.0 * σ^2)
+    log_norm = -0.5 * CELL_NPIX * log(2π * σ^2)
+    ll = 0.0
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> 1:n_cells
+        d_row = <span class="hljs-meta">@view</span> D[i, :]
+        mx = -minimum(d_row) * inv2σ2
+        lse = mx + log(sum(
+            exp(-d * inv2σ2 - mx) <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> d_row
+        ))
+        ll += lse + log_norm - log(n_chars)
+    <span class="hljs-keyword">end</span>
+    Turing.<span class="hljs-meta">@addlogprob!</span> ll
+<span class="hljs-keyword">end</span>
+
+chain = sample(
+    ascii_model(D, n_cells, N_CHARS),
+    NUTS(), 500,
+)</code></pre>
+        </div>
+      </div>
+      <figcaption> <b>Posterior samples</b> from a Turing.jl ascii-inverse model, conditioned on the photograph underneath.</figcaption>
+    </figure>
   </div>
-</div>
- </p>
-<h2 id="formerly"><a href="#formerly" class="header-anchor">Formerly</a></h2>
-<p><strong>McMaster:</strong> I completed my M.Sc. under <a href="https://math.mcmaster.ca/~bolker/">Prof. Ben Bolker</a> in June 2023, specializing in  inference for stochastic state-space models of historical plagues. </p>
-<h2 id="interests"><a href="#interests" class="header-anchor">Interests</a></h2>
-<ul>
-<li><p>Bayesian Statistical Methods</p>
-</li>
-<li><p>Machine Learning Algorithms</p>
-</li>
-<li><p>Historical Data Analysis</p>
-</li>
-</ul>
-<hr />
-<h2 id="get_in_touch"><a href="#get_in_touch" class="header-anchor">Get in Touch</a></h2>
-<p>Feel free to connect with me on <a href="https://www.linkedin.com/in/jasonpekos/">LinkedIn</a> or send me an email at <code>jason &#40;dot&#41; pekos &#40;at&#41; gmail &#40;dot&#41; com</code>.</p>
-<p><img src="https://raw.githubusercontent.com/JasonPekos/CppSplines/main/cubicanim.gif" alt="anim" /></p>
-<div class="page-foot">
-    JasonPekos. Last modified: July 22, 2024.
-    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
-</div>
 
-<!-- Collapsible button example -->
+  <p class="home-contact"><b>Contact</b>: <code>first.last@gmail.com</code> | <a href="https://github.com/JasonPekos">github</a> | <a href="https://www.linkedin.com/in/jasonpekos/">linkedin</a></p>
+
+<script src="/assets/scripts/ascii-player.js" defer></script>
+<script src="/assets/scripts/portrait-hero.js" defer></script>
+
+</div><footer class="colophon">
+  <div class="rule-top">
+    <p>JasonPekos. Last modified: August 10, 2026. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.</p>
+  </div>
+</footer>
+
 <script>
-    var coll = document.getElementsByClassName("collapsible");
-    var i;
-    
-    for (i = 0; i < coll.length; i++) {
-      coll[i].addEventListener("click", function() {
-        this.classList.toggle("active");
-        var content = this.nextElementSibling;
-        if (content.style.display === "block") {
-          content.style.display = "none";
-        } else {
-          content.style.display = "block";
-        }
+/* theme toggle — light is the default, dark is opt-in; an explicit choice
+   persists across pages (restored before first paint in head.html) */
+(function () {
+  var btn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  var fadeTimer = null;
+  if (root.getAttribute('data-theme') === 'dark') btn.setAttribute('aria-pressed', 'true');
+  btn.addEventListener('click', function () {
+    root.classList.add('theme-fade');          // everything crosses together
+    var dark = root.getAttribute('data-theme') !== 'dark';
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    btn.setAttribute('aria-pressed', String(dark));
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(function () { root.classList.remove('theme-fade'); }, 420);
+  });
+})();
+
+/* Rougier pass: fade punctuation, popout the sampling ~ — runs after hljs,
+   walks TEXT nodes only (never inside strings, comments, or macro spans) */
+window.addEventListener("load", function () {
+  requestAnimationFrame(function () {
+    document.querySelectorAll("pre code").forEach(function (code) {
+      var tw = document.createTreeWalker(code, NodeFilter.SHOW_TEXT, null);
+      var nodes = [];
+      while (tw.nextNode()) {
+        var el = tw.currentNode.parentElement;
+        if (el && el.closest(".hljs-string, .hljs-comment, .hljs-meta, .cp, .ctld")) continue;
+        nodes.push(tw.currentNode);
+      }
+      nodes.forEach(function (n) {
+        var t = n.nodeValue;
+        if (!/[()\[\]{},;]| ~ /.test(t)) return;
+        var frag = document.createDocumentFragment();
+        t.split(/([()\[\]{},;]| ~ )/).forEach(function (part) {
+          if (!part) return;
+          if (part === " ~ ") {
+            frag.append(" ");
+            var m = document.createElement("span");
+            m.className = "ctld"; m.textContent = "~";
+            frag.append(m); frag.append(" ");
+          } else if (/^[()\[\]{},;]$/.test(part)) {
+            var sp = document.createElement("span");
+            sp.className = "cp"; sp.textContent = part;
+            frag.append(sp);
+          } else frag.append(part);
+        });
+        n.replaceWith(frag);
       });
+    });
+  });
+});
+
+/* code-language tabs (NumPyro / Turing) */
+document.querySelectorAll('.code-tabs').forEach(function (group) {
+  var buttons = group.querySelectorAll('.code-tab-btn');
+  var panels = group.querySelectorAll('.code-tab-content');
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      buttons.forEach(function (b) { b.classList.remove('active'); });
+      panels.forEach(function (pn) { pn.classList.remove('active'); });
+      btn.classList.add('active');
+      var target = group.querySelector('#' + btn.dataset.tab);
+      if (target) target.classList.add('active');
+    });
+  });
+});
+
+/* mark the active nav link */
+(function () {
+  var here = location.pathname.replace(/index\.html$/, '');
+  document.querySelectorAll('.topnav a.navlink').forEach(function (a) {
+    var p = a.getAttribute('href');
+    if (p === here || (p !== '/' && here.indexOf(p) === 0) ||
+        (p === '/menu1/' && here.indexOf('/pages/') === 0)) {
+      a.setAttribute('aria-current', 'page');
     }
-  </script>
-  <!-- End collapsible button example -->
-</div><!-- CONTENT ENDS HERE -->
-    
-    
-  </body>
+  });
+})();
+
+/* title-bar water — still, blank water; every so often a boat
+   crosses (seen from above), trailing a Kelvin-ish wake that rings
+   outward and dissipates back to stillness. seeded, so deterministic. */
+(function () {
+  var el = document.getElementById("oceanBar");
+  if (!el) return;
+  var last = null;   // last-painted frame; identical frames skip the innerHTML write
+  function paint(out) { if (out !== last) { el.innerHTML = out; last = out; } }
+  var s = 77041 >>> 0;
+  function rand() { s = (1664525 * s + 1013904223) >>> 0; return s / 4294967296; }
+
+  var cw, lh, cols, rows;
+  function measure() {
+    var probe = document.createElement("span");
+    probe.textContent = "MMMMMMMMMM";
+    probe.style.visibility = "hidden";
+    el.appendChild(probe);
+    cw = probe.getBoundingClientRect().width / 10;
+    el.removeChild(probe);
+    lh = parseFloat(getComputedStyle(el).lineHeight);
+    cols = Math.max(20, Math.ceil(el.clientWidth / cw));
+    rows = Math.max(4, Math.floor(el.clientHeight / lh));
+  }
+  measure();
+  addEventListener("resize", function () { measure(); });
+
+  var V = 24;      // boat speed, columns / second
+  var TAU = 2.4;   // wake decay time (s)
+  var RING = 1.6;  // ripple spread speed (rows / second)
+  var pass = null, nextAt = 2.0;
+
+  // deterministic per-cell noise, stable within a pass (ragged, not fizzing)
+  function cellNoise(c, r, seed) {
+    var x = (c * 73856093 ^ r * 19349663 ^ seed * 83492791) >>> 0;
+    x = ((x ^ (x >>> 13)) * 1274126177) >>> 0;
+    return ((x ^ (x >>> 16)) >>> 0) / 4294967296;
+  }
+
+  function frame(nowMs) {
+    var now = nowMs / 1000;
+    if (!pass && now >= nextAt) {
+      // visual entry angle ~uniform in ±65°; steep tracks extend off-screen,
+      // so the boat appears to sail in over the top (or bottom) edge
+      var phi = (rand() * 2 - 1) * 1.13;             // radians, ±~65°
+      pass = { t0: now,
+               cx: cols * (0.2 + rand() * 0.6),      // a point the track
+               cy: rows * (0.2 + rand() * 0.6),      //   crosses in-band
+               slope: Math.tan(phi) / 1.76,          // rows/col (cell aspect)
+               ltr: rand() < 0.5,
+               seed: (rand() * 1e9) | 0 };
+    }
+    var xb = null;
+    if (pass) {
+      var dt = now - pass.t0;
+      xb = pass.ltr ? dt * V : cols - dt * V;
+      if (dt > cols / V + TAU * 2.5) {               // boat gone, wake stilled
+        pass = null; xb = null;
+        nextAt = now + 6 + rand() * 10;              // next crossing in 6-16s
+      }
+    }
+    // row of the boat's track at column c — a line through (cx, cy);
+    // rows outside the band are simply never rendered (the mask)
+    function trackRow(c) {
+      return pass.cy + pass.slope * (c - pass.cx);
+    }
+    var out = "";
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var ch = " ";
+        if (xb !== null) {
+          var behind = pass.ltr ? xb - c : c - xb;   // columns behind the bow
+          var rc = trackRow(c);
+          if (behind >= -0.6 && behind < 1.4 && Math.abs(r - rc) < 0.51) {
+            ch = '<span class="boat">@</span>';      // the boat, in accent
+          } else if (behind >= 1.4 && behind < 4 && Math.abs(r - rc) < 0.51) {
+            ch = '<span class="boat">=</span>';      // churn at the stern
+          } else if (behind >= 0) {
+            var age = behind / V;                    // seconds since the bow passed
+            var u = cellNoise(c, r, pass.seed);      // ragged arms, uneven fade
+            var spread = RING * (0.8 + 0.5 * cellNoise(c, 9999, pass.seed));
+            var arm = Math.abs(r - rc) - spread * age;
+            var ring = Math.exp(-(arm * arm) / 0.6)
+                     * Math.exp(-age / TAU) * (0.55 + 0.9 * u);
+            if (ring > 0.5) ch = "~";
+            else if (ring > 0.22) ch = "-";
+            else if (ring > 0.16 && u > 0.75) ch = "-";   // stray ripple flecks
+            if (ch !== " ") {                             // fresh wake runs purple;
+              var u2 = cellNoise(c + 101, r + 57, pass.seed + 7);
+              if (u2 < Math.exp(-behind / 14)) {          //   odds fade with distance
+                ch = '<span class="ripA">' + ch + '</span>';
+              }
+            }
+          }
+        }
+        out += ch;
+      }
+      if (r < rows - 1) out += "\n";
+    }
+    paint(out);
+  }
+
+  /* dark mode gets the northern lights; light mode keeps the boats.
+     three sinuous curtains, each a Gaussian ribbon around a drifting
+     S-shaped centreline: green core, purple fringe, slow fade in/out */
+  var RIBBONS = [
+    { f1: 1.3, f2: 2.6, a1: 0.30, a2: 0.14, s1:  0.045, s2: -0.070, w: 1.15, T: 63, ph: 0.0 },
+    { f1: 0.9, f2: 2.1, a1: 0.26, a2: 0.12, s1: -0.035, s2:  0.055, w: 0.95, T: 89, ph: 2.4 },
+    { f1: 1.7, f2: 3.4, a1: 0.22, a2: 0.10, s1:  0.060, s2: -0.045, w: 0.80, T: 76, ph: 4.4 }
+  ];
+  function aurora(nowMs) {
+    var t = nowMs / 1000, out = "";
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var x = c / cols, core = 0, fringe = 0;
+        for (var i = 0; i < RIBBONS.length; i++) {
+          var q = RIBBONS[i];
+          // gated life-cycle: each ribbon is dark ~80% of its period and
+          // blooms smoothly through the rest — most of the time, no aurora
+          var raw = Math.sin(6.283 * t / q.T + q.ph);
+          if (raw <= 0.68) continue;
+          var life = Math.pow((raw - 0.68) / 0.32, 1.3);
+          var y = rows * (0.5
+                + q.a1 * Math.sin(6.283 * (q.f1 * x) + q.s1 * 6.283 * t + q.ph)
+                + q.a2 * Math.sin(6.283 * (q.f2 * x) + q.s2 * 6.283 * t + 1.7 * q.ph));
+          var env = 0.6 + 0.4 * Math.sin(6.283 * (0.8 * x) + 0.11 * t + q.ph); // glow drifts along the ribbon
+          var d = Math.abs(r - y) / q.w;
+          var g = Math.exp(-d * d) * life * env;
+          core += g;
+          fringe += Math.exp(-(d - 1.9) * (d - 1.9) / 1.4) * life * env * 0.7;
+        }
+        var b = Math.max(core, fringe * 0.85);
+        if (b <= 0.09) { out += " "; continue; }
+        // massive thinning: most lit cells stay dark; survival odds scale
+        // with brightness and twinkle slowly per cell
+        var u = cellNoise(c, r, 424243);
+        var tw = 0.6 + 0.4 * Math.sin(t * (0.4 + 0.5 * u) + u * 40);
+        if (u > b * 0.5 * tw) { out += " "; continue; }
+        var ch = b > 0.62 ? "|" : b > 0.38 ? "!" : b > 0.2 ? ":" : ".";
+        var cls = (b > 0.7 && u > 0.18) ? "aur-w"              // muted-grey sparkle (see .aur-w)
+                : (core >= fringe ? "aur-g" : "aur-p");
+        out += '<span class="' + cls + '">' + ch + "</span>";
+      }
+      if (r < rows - 1) out += "\n";
+    }
+    paint(out);
+  }
+  function tick(now) {
+    if (document.documentElement.getAttribute("data-theme") === "dark") aurora(now);
+    else frame(now);
+  }
+  tick(0);
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var visible = true, paused = reduced;
+  if (!reduced) {
+    if ("IntersectionObserver" in window)
+      new IntersectionObserver(function (es) {
+        visible = es[es.length - 1].isIntersecting;   // newest record, not oldest
+        if (visible && !paused) tick(performance.now());   // catch theme flips
+      }).observe(el);
+    setInterval(function () {
+      if (document.hidden) return;                    // no repaints in hidden tabs
+      if (visible && !paused) tick(performance.now());
+    }, 90);
+    el.addEventListener("pointerup", function () { paused = !paused; });
+    el.title = "click — pause";
+  }
+  var tb = document.getElementById("themeBtn");
+  if (tb) tb.addEventListener("click", function () { setTimeout(function () { tick(0); }, 0); });
+})();
+</script>
+
+
+
+</body>
 </html>

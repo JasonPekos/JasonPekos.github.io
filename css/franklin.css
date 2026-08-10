@@ -1,449 +1,566 @@
-/* ==================================================================
-    VARIABLES
-================================================================== */
 
+/* Berkeley Mono — the licensed mono, served locally */
+@font-face { font-family: 'Berkeley Mono'; font-style: normal; font-weight: 400;
+  font-display: swap; src: url('/assets/fonts/berkeley-mono/WEB/BerkeleyMono-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Berkeley Mono'; font-style: normal; font-weight: 700;
+  font-display: swap; src: url('/assets/fonts/berkeley-mono/WEB/BerkeleyMono-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Berkeley Mono'; font-style: italic; font-weight: 400;
+  font-display: swap; src: url('/assets/fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff2') format('woff2'); }
+@font-face { font-family: 'Berkeley Mono'; font-style: italic; font-weight: 700;
+  font-display: swap; src: url('/assets/fonts/berkeley-mono/WEB/BerkeleyMono-BoldItalic.woff2') format('woff2'); }
+
+/* ==========================================================================
+   franklin.css — the redesign, ported from design-reference.html
+   One stylesheet: tokens, shell, prose, code, figures, plots, diagrams,
+   the index tiers, the homepage hero, and the sea.
+   ========================================================================== */
+
+/* ============================================================
+   DESIGN TOKENS
+   The whole system lives here. Everything downstream is written
+   against roles, never raw hex, so light/dark swap in one place.
+   ============================================================ */
 :root {
-  font-family: Inter, sans-serif;
-  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
-  --block-background: hsl(0, 0%, 94%);
-  --output-background: hsl(0, 0%, 98%);
-  --small: 13px;
-  --normal: 17px;
-  --text-color: hsv(0, 0%, 20%);
+  /* -- colour: white, matching the old site & the-proportional-web -- */
+  --paper:  #FFFFFF;
+  --surface:#F3F3F1;   /* faint grey for code / figure wells    */
+  --ink:    #1A1917;
+  --muted:  #6C6962;   /* sidenotes, captions, code comments   */
+  --faint:  #939089;   /* axis ticks, very quiet labels        */
+  --rule:   #E8E6E1;   /* hairlines                            */
+  --rule-strong: #C9C6BD; /* section-break rules — a touch heavier */
+  --accent: #5E4489;   /* links — a muted purple               */
+  --rare:   #B05F2A;   /* orange — the single data "signal"    */
+
+  /* -- plot series: harmonic purple / orange / green (CVD-validated) -- */
+  --s1: #6A4C99;  --s2: #C06A2E;  --s3: #457E45;
+  /* flock extension (CVD-checked): teal, wine, rose, olive */
+  --s4: #2A6E7E;  --s5: #8E3B4E;  --s6: #C4788C;  --s7: #6F5D1D;
+
+  /* -- type: system serif, Berkeley Mono for code. --serif-sc is a
+        separate token so small-caps contexts can take a dedicated face
+        without touching every rule. -- */
+  --serif:    'Iowan Old Style',Palatino,Georgia,serif;
+  --serif-sc: 'Iowan Old Style',Palatino,Georgia,serif;
+  --mono: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* -- proportional scale, tuned tighter toward the proportional web -- */
+  --f-caption: 0.8rem;
+  --f-body:    1rem;
+  /* headings sit UNDER the brand (1.3rem): the site name is the biggest
+     type on any page; h3 differs from body by style (italic), barely size */
+  --f-h3:      1.02rem;
+  --f-h2:      1.15rem;
+  --f-h1:      1.6rem;
+  --lh:        1.28;   /* tight, toward the-proportional-web's 1.2 rhythm */
+  --leading:   1.28rem;/* one leading — the vertical rhythm unit (prop-web's --line-height idea) */
+  --fw-normal: 400;
+  --fw-bold:   700;
+
+  --measure: 44rem;    /* the centred column — one width, every page (≈ the old site's 705px) */
+  --note-w:  10rem;    /* margin column, lives ENTIRELY outside the measure */
+  --note-gap: 1.25rem; /* clearance between column and margin note          */
+
+  color-scheme: light;
+}
+/* light is the default everywhere, regardless of OS preference;
+   dark is opt-in via the theme toggle */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:  #16150F;
+  --surface:#201E17;
+  --ink:    #E9E4D8;
+  --muted:  #A29C8F;
+  --faint:  #837E72;
+  --rule:   #33302A;
+  --rule-strong: #4C483F;
+  --accent: #B7A3E4;
+  --rare:   #D9925A;
+  --s1: #9079C0;  --s2: #C67539;  --s3: #579C55;
+  --s4: #63A8B8;  --s5: #B04A66;  --s6: #EDB0BF;  --s7: #C7B457;
 }
 
-@supports (font-variation-settings: normal) {
-  :root { font-family: InterVariable, sans-serif; }
-}
-
-/* ==================================================================
-    DEFAULT FONT AND LAYOUT
-================================================================== */
-
-@font-face {
-  font-family: Inter;
-  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
-}
-
-@font-face {
-  font-family: 'Berkley Mono';
-  src: url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Bold.woff2') format('woff2'),
-       url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Bold.woff') format('woff');
-  font-weight: bold;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Berkley Mono';
-  src: url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff2') format('woff2'),
-       url('/_assets/fonts/berkeley-mono/WEB/BerkeleyMono-Italic.woff') format('woff');
-  font-weight: normal;
-  font-style: italic;
-}
-
-
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
 html {
-  font-family: 'Berkley Mono', monospace;
-  font-size: var(--normal);
-  color: var(--text-color);
+  /* relative, fluid root — near the proportional web's 16px, gently scaling */
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.0625rem);
+  -webkit-text-size-adjust: 100%;
 }
-
-/* ==================================================================
-    BASIC GRID FOR PROFILE PIC
-================================================================== */
-
-.franklin-content .row {
-  display: block;
-}
-
-.franklin-content .left {
-  float: left;
-  margin-right: 15px;
-}
-
-.franklin-content .right {
-  float: right;
-}
-
-.franklin-content .container img {
-  width: auto;
-  padding-left: 0;
-  border-radius: 10px;
-}
-
-.franklin-content .footnote {
-  position: relative;
-  top: -0.5em;
-  font-size: 70%;
-}
-
-/* ==================================================================
-    FOOT / COPYRIGHT
-================================================================== */
-
-.franklin-content .page-foot a {
-  text-decoration: none;
-  color: #a6a2a0;
-  text-decoration: underline;
-}
-
-.page-foot {
-  font-size: 80%;
-  font-family: Arial, serif;
-  color: #a6a2a0;
-  text-align: center;
-  margin-top: 6em;
-  border-top: 1px solid lightgrey;
-  padding-top: 2em;
-  margin-bottom: 4em;
-}
-
-/* ==================================================================
-    TEXT GEOMETRY
-================================================================== */
-
-.franklin-toc li {
-  /* Avoid clickable elements being too close together. */
-  margin: 0.6rem 0;
-}
-
-.franklin-content {
-  position: relative;
-  padding-left: 12.5%;
-  padding-right: 12.5%;
-  line-height: 1.35em;
-}
-
-/* On wide screens, fix content width to a max value. */
-@media (min-width: 940px) {
-  .franklin-content {
-    width: 705px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-/* On narrow device, reduce margins. */
-@media (max-width: 480px) {
-  .franklin-content {
-    padding-left: 6%;
-    padding-right: 6%;
-  }
-}
-
-/* ==================================================================
-    TITLES
-================================================================== */
-
-.franklin-content h1 { font-size: 24px; }
-.franklin-content h2 { font-size: 22px; }
-.franklin-content h3 { font-size: 20px; }
-
-.franklin-content h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  text-align: left;
-}
-
-.franklin-content h1 {
-  padding-bottom: 0.5em;
-  border-bottom: 3px double lightgrey;
-  margin-top: 1.5em;
-  margin-bottom: 1em;
-}
-
-.franklin-content h2 {
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid lightgrey;
-  margin-top: 2em;
-  margin-bottom: 1em;
-}
-
-.franklin-content h1 a { color: inherit; }
-.franklin-content h1 a:hover { text-decoration: none; }
-.franklin-content h2 a { color: inherit; }
-.franklin-content h2 a:hover { text-decoration: none; }
-.franklin-content h3 a { color: inherit; }
-.franklin-content h3 a:hover { text-decoration: none; }
-.franklin-content h4 a { color: inherit; }
-.franklin-content h4 a:hover { text-decoration: none; }
-.franklin-content h5 a { color: inherit; }
-.franklin-content h5 a:hover { text-decoration: none; }
-.franklin-content h6 a { color: inherit; }
-.franklin-content h6 a:hover { text-decoration: none; }
-
-.franklin-content table {
-  margin-left: auto;
-  margin-right: auto;
-  border-collapse: collapse;
-  text-align: center;
-}
-
-.franklin-toc ol ol {
-  list-style-type: lower-alpha;
-}
-
-.franklin-content th,
-td {
-  font-size: var(--small);
-  padding: 10px;
-  border: 1px solid black;
-}
-
-.franklin-content blockquote {
-  background: var(--block-background);
-  border-left: 7px solid #a8a8a8;
-  margin: 1.5em 10px;
-  padding: 0.5em 10px;
-  font-style: italic;
-}
-
-.franklin-content blockquote p {
-  display: inline;
-}
-
-/* ==================================================================
-    GENERAL FORMATTING
-================================================================== */
-
-/* Spacing between bullet points. */
-.franklin-content li p {
-  margin: 10px 0;
-}
-
-.franklin-content a {
-  color: #004de6;
-  text-decoration: none;
-}
-
-.franklin-content a:hover {
-  text-decoration: underline;
-}
-
-/* ==================================================================
-    HYPERREFS AND FOOTNOTES
-================================================================== */
-
-.franklin-content .eqref a { color: green; }
-.franklin-content .bibref a { color: green; }
-
-.franklin-content sup {
-  font-size: 70%;
-  vertical-align: super;
-  line-height: 0;
-}
-
-.franklin-content table.fndef {
+body {
   margin: 0;
-  margin-bottom: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh);
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  font-feature-settings: "kern" 1, "liga" 1, "onum" 1;  /* old-style figures */
+  text-rendering: optimizeLegibility;
+  /* NB: deliberately NOT -webkit-font-smoothing:antialiased — that thins text
+     on macOS; the default rendering matches the reference's weight. */
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.franklin-content .fndef tr,
-td {
-  padding: 0;
-  border: 0;
-  text-align: left;
+/* ============================================================
+   LAYOUT — ONE centred column (the measure). Everything is bounded to
+   it and centred in the viewport. Margin notes hang ENTIRELY in the
+   right margin (never encroaching). Wide content breaks out SYMMETRICALLY.
+   ============================================================ */
+.masthead, .franklin-content, footer.colophon {
+  max-width: var(--measure); margin: 0 auto; padding: 0 1.25rem;
+}
+.franklin-content { counter-reset: sidenote; }
+
+/* ---- headings: the-proportional-web section style ----
+   all-small-caps gives uniform glyph height (no tall initial); sections are
+   set off by whitespace + wide tracking, NOT a break rule. */
+h1, h2 { font-family: var(--serif-sc); font-variant: all-small-caps; }
+h3 { font-family: var(--serif); font-style: italic; font-weight: 500; line-height: 1.3; }
+h1 { font-size: var(--f-h1); font-weight: 500; line-height: 1.14;
+     letter-spacing: 0.03em; margin: 0 0 0.3rem; }
+/* section heads: spaced small caps, whitespace above, break rule BELOW the
+   title (prop-web puts the line under the heading, ~a line-height down) */
+h2 { font-size: var(--f-h2); font-weight: 450; letter-spacing: 0.07em; line-height: 1.2;
+     margin: 3.6rem 0 1.5rem; padding: 0 0 0.7rem;
+     border-bottom: 1.5px solid var(--ink); }
+h3 { font-size: var(--f-h3); margin: 3rem 0 0.75rem; }
+
+/* ---- paragraphs: one leading of air between them, no indent ----
+   (deliberate departure from prop-web's 3ch indents: indents pay off with
+   long booklike paragraphs; this site has many short ones, and an indented
+   one-liner reads as a mistake. no drop caps either — no enlarged first
+   characters anywhere.) */
+.franklin-content > p { margin: var(--leading) 0 0; text-indent: 0; }
+.marginnote, figcaption { text-indent: 0; }
+
+
+/* ---- justified running text, with a switch ----
+   prop-web's full recipe: justify + hyphens + pretty wrapping + a permissive
+   hyphenation floor so short words can break and spacing stays even */
+.franklin-content p { text-align: justify; hyphens: auto; -webkit-hyphens: auto;
+             text-wrap: pretty; word-break: break-word;
+             hyphenate-limit-chars: 3; }
+
+/* weight hierarchy: solid body, real bold, lighter secondary text */
+strong, b { font-weight: var(--fw-bold); }
+.sidenote, .marginnote, figcaption, .dek, footer.colophon { font-weight: 400; }
+
+/* ---- links: accent purple, quiet underline. no bright blue anywhere ---- */
+a { color: var(--accent); text-decoration: underline;
+    text-decoration-thickness: 1px; text-underline-offset: 2px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+a:hover { text-decoration-color: var(--accent); }
+
+/* ============================================================
+   SIDENOTES  (numbered, in the right margin; collapse on narrow)
+   ============================================================ */
+.sn-ref { counter-increment: sidenote; }
+.sn-ref::after {
+  content: counter(sidenote);
+  font-family: var(--mono); font-size: 0.62em; vertical-align: super;
+  color: var(--accent); padding-left: 0.1em;
+}
+/* Both note kinds share one containing block (the measure column), so one
+   negative right margin drops them wholly into the right margin, clear of
+   the text. note-gap is the clearance; nothing overlaps the column. */
+.sidenote, .marginnote {
+  float: right; clear: right;
+  width: var(--note-w);
+  margin: 0.15rem calc(-1 * (var(--note-w) + var(--note-gap))) 1.1rem 0;
+  font-size: var(--f-caption); line-height: 1.4; color: var(--muted);
+  font-family: var(--serif);
+  text-align: left; hyphens: manual;   /* ragged right at narrow measures (prop-web asides) */
+}
+.sidenote::before {
+  content: counter(sidenote) "  ";
+  font-family: var(--mono); font-size: 0.85em; color: var(--accent);
+}
+.marginnote img, .marginnote svg { display:block; width: 100%; height: auto; }
+.marginnote figcaption { margin-top: 0.3rem; }
+
+/* ============================================================
+   FIGURES & PLOTS
+   ============================================================ */
+/* plots/images live IN the centred column (bounded to the measure) */
+figure { margin: 2rem 0; max-width: 100%; }
+figcaption { font-size: var(--f-caption); color: var(--muted);
+             margin-top: 0.6rem; max-width: 100%; }
+figcaption b { color: var(--ink); font-weight: 600; }
+
+
+
+/* ============================================================
+   CODE — typography as highlighting, never rainbow
+   ============================================================ */
+code { font-family: var(--mono); font-size: 0.88em;
+       background: var(--surface); padding: 0.08em 0.3em; border-radius: 3px; }
+/* code lives in the column; long lines scroll inside the block, not past it */
+pre { font-family: var(--mono); font-size: 0.84rem; line-height: 1.6;
+      background: var(--surface); border: 1px solid var(--rule);
+      border-radius: 4px; padding: 0.9rem 1.1rem; overflow-x: auto;
+      max-width: 100%; }
+pre code { background: none; padding: 0; font-size: inherit; }
+
+
+
+
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+/* prop-web tables: strong small-caps head over one ink rule; body rows carry
+   no borders — spacing alone separates them.
+   NB: Franklin emits bare <table><tr><th> (the parser implies tbody, never
+   thead), so the header row is targeted by position, not by thead. */
+table { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+th, td { text-align: left; padding: 0.45rem 0.7rem 0.45rem 0;
+         vertical-align: top; }
+table tr:first-child th { font-family: var(--serif-sc); font-variant: all-small-caps;
+           font-size: 1.05em; font-weight: 500; letter-spacing: 0.075em;
+           color: var(--ink); border-bottom: 1.5px solid var(--ink); }
+tbody th { font-weight: 600; padding-right: 1rem; }
+
+
+
+
+
+/* ---- top nav: brand left, links right (same shape as the old site,
+   restyled — name in small caps, quiet mono links that light up on hover) ---- */
+.topnav { position: relative;   /* the containing block for the sea (see SHELL) */
+          max-width: var(--measure); margin: 0 auto; padding: 1.9rem 1.25rem 1.35rem;
+          display: flex; align-items: baseline; justify-content: space-between;
+          gap: 1rem 1.5rem; flex-wrap: wrap; border-bottom: 1px solid var(--rule); }
+.topnav .brand { font-family: var(--serif-sc); font-size: 1.3rem; font-weight: 500;
+                 letter-spacing: 0.02em; color: var(--ink); text-decoration: none; }
+.topnav .brand:hover { color: var(--accent); }
+.topnav ul { list-style: none; margin: 0; padding: 0;
+             display: flex; flex-wrap: wrap; gap: 0.35rem 1.15rem;
+             /* optical correction, NOT a bug: the links share the brand's
+                baseline, but 0.85rem mono against 1.3rem small caps reads
+                ~2px low; this centres the glyph masses. keep sub-2px. */
+             transform: translateY(-1.5px); }
+.topnav a.navlink { font-family: var(--mono); font-size: 0.85rem; color: var(--muted);
+                    text-decoration: none; padding-bottom: 2px;
+                    border-bottom: 1.5px solid transparent;
+                    transition: color .15s ease, border-color .15s ease; }
+.topnav a.navlink[aria-current="page"] { color: var(--ink); border-bottom-color: var(--rule-strong); }
+.topnav a.navlink:hover { color: var(--accent); border-bottom-color: var(--accent); }
+@media (max-width: 30rem) {
+  .topnav { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
 }
 
-.franklin-content .fndef tr {
-  border-left: 2px solid lightgray;
+/* ---- masthead & meta ---- */
+.masthead { padding-top: 2.2rem; padding-bottom: 0.5rem; }
+.masthead .kicker { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em;
+                    text-transform: uppercase; color: var(--muted); margin: 0 0 0.6rem; }
+.masthead .dek { color: var(--muted); font-size: 1.05rem; max-width: var(--measure); margin: 0.4rem 0 0; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; align-items: baseline;
+            margin: 1.4rem 0 0; padding-top: 0.9rem; border-top: 1px solid var(--rule);
+            font-family: var(--mono); font-size: 0.75rem; color: var(--muted); max-width: 100%; }
+.theme-btn { margin-left: auto; font-family: var(--mono); font-size: 0.72rem;
+             background: none; border: 1px solid var(--rule); color: var(--muted);
+             padding: 0.25rem 0.6rem; border-radius: 3px; cursor: pointer; }
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* prop-web horizontal break: a rule with the floral heart ❧ (U+2767) riding it */
+hr { position: relative; border: none; height: var(--leading);
+         margin: calc(var(--leading) * 2) auto; max-width: 100%; }
+hr::before { content: ""; position: absolute; top: 50%; left: 0; width: 100%;
+                 border-top: 1.5px solid var(--ink); }
+hr::after { content: "\2767"; position: absolute; top: 50%; left: 50%;
+                transform: translate(-50%, -52%); background: var(--paper);
+                padding: 0 1ch; font-size: 1.25rem; color: var(--ink); }
+
+/* prop-web lists (bare ul/ol in prose only — classed lists style themselves):
+   hung markers, ol numbers small and medium-weight */
+.franklin-content ul:not([class]), .franklin-content ol:not([class]) { list-style: none; padding: 0;
+                                                                       margin: var(--leading) 0 0; }
+.franklin-content ul:not([class]) li::before { content: "\2022"; margin-right: 1ch; }
+.franklin-content ol:not([class]) { counter-reset: item; }
+.franklin-content ol:not([class]) li::before { content: counters(item, ".") ". ";
+                                               counter-increment: item;
+                                               font-size: 0.875em; font-weight: 500; }
+
+footer.colophon { margin-top: 4rem; padding-top: 1.2rem; padding-bottom: 4rem; color: var(--muted);
+                  font-size: var(--f-caption); }
+footer.colophon .rule-top { border-top: 1px solid var(--rule); padding-top: 1.2rem; max-width: 100%; }
+
+/* prop-web quotations: indented block, real quotation marks, no border rule */
+blockquote { margin: var(--leading) 3ch; padding: 0; color: var(--ink); }
+blockquote > p { margin: 0; text-indent: 0; }
+blockquote > p:first-of-type::before { content: "\201c"; }
+blockquote > p:last-of-type::after  { content: "\201d"; }
+
+/* ---- collapsible dropdowns (prop-web: full-ink borders, » marker that
+   rotates open — same fixed-width marker box so the label never shifts) ---- */
+details { margin: calc(var(--leading) * 1.5) 0; padding: var(--leading) 0;
+          border-top: 1.5px solid var(--ink);
+          border-bottom: 1.5px solid var(--ink); }
+summary { cursor: pointer; font-style: italic; color: var(--ink);
+          list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "\bb"; font-style: normal;
+                  display: inline-block; width: 1.15em;
+                  transition: transform 0.12s ease; }
+details[open] summary::before { transform: rotate(90deg) translateX(0.05em); }
+details[open] summary { margin-bottom: var(--leading); }
+details > p { margin: 0; }
+details > p:not(:last-child) { margin-bottom: var(--leading); }
+
+/* ============================================================
+   RESPONSIVE — collapse the margin; sidenotes become insets
+   ============================================================ */
+/* below ~1100px the right margin can't hold a note without touching the
+   column, so notes fold inline (as bordered insets) instead of floating */
+@media (max-width: 69rem) {
+  .sidenote, .marginnote {
+    float: none; width: auto; max-width: 100%;
+    margin: 0.7rem 0; padding: 0.5rem 0 0.5rem 0.9rem;
+    border-left: 2px solid var(--rule); background: var(--surface);
+  }
+}
+@media print {
+  .theme-btn { display: none; }
+  body { background: #fff; color: #000; }
 }
 
-.franklin-content .fndef td.fndef-backref {
-  vertical-align: top;
-  font-size: 70%;
-  padding-left: 5px;
+
+/* ============================================================
+   SHELL — the sea in the title bar (site-wide)
+   ============================================================ */
+/* ---- the nav rule is the waterline; the brand and links knock out
+   to paper so the sea passes behind them ---- */
+.topnav .brand, .topnav ul {
+  position: relative; z-index: 1; background: var(--paper);
+  box-shadow: 0 0 0 8px var(--paper); }          /* quiet knockout halo */
+.topnav .brand { display: inline-block; }
+pre.ocean { position: absolute; inset: 0; z-index: 0; margin: 0; overflow: hidden;
+            background: none; border: none; border-radius: 0; padding: 0;
+            font-family: var(--mono); font-size: 0.68rem; line-height: 1.2;
+            color: var(--faint);
+            color: color-mix(in srgb, var(--faint) 55%, transparent);
+            user-select: none; }
+pre.ocean .boat { color: var(--accent); font-weight: 700; }
+pre.ocean .ripA { color: var(--accent); }
+
+/* ============================================================
+   HOMEPAGE hero
+   ============================================================ */
+/* ---- homepage: one measure, two-column hero ---- */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) min-content;
+        gap: 0 2.25rem; align-items: start;
+        margin: calc(var(--leading) * 2) 0 var(--leading); }
+.hero-text p { margin: var(--leading) 0 0; text-indent: 0;
+               text-align: left; }   /* ragged: the column is narrow beside the portrait */
+.hero-text p:first-child { margin-top: 0; }
+@media (max-width: 50rem) {
+  .hero { grid-template-columns: 1fr; gap: var(--leading) 0; }
+  .portrait-fig { margin: 0 auto; order: -1; }   /* portrait first when stacked */
 }
 
-.franklin-content .fndef td.fndef-content {
-  font-size: 80%;
-  padding-left: 10px;
-  width: 100%;
+/* ---- ascii portrait: a running Gibbs chain over the character field ---- */
+.portrait-fig { margin: 0; width: min-content; max-width: 100%; }
+.portrait-wrap { position: relative; width: max-content; max-width: 100%;
+                 cursor: pointer; }
+/* a gridfig living under interactive overlays (the hero portrait): no
+   selection (the chain rewrites it constantly), no margins, and a fade */
+pre.ascii-fig.overlaid { margin: 0; overflow: hidden; user-select: none;
+                         transition: opacity 0.3s ease; }
+/* hover: the observed data fades in over the posterior sample (80%) */
+.photo-reveal { position: absolute; inset: 0; opacity: 0;
+                transition: opacity 0.3s ease; pointer-events: none; }
+.photo-reveal img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.portrait-wrap:hover .photo-reveal { opacity: 0.8; }
+.portrait-wrap:hover pre.ascii-fig { opacity: 0.25; }
+/* click: the program takes the portrait's place, same box */
+.code-reveal { position: absolute; inset: 0; display: none; overflow: auto;
+               background: var(--surface);
+               background: color-mix(in srgb, var(--surface) 84%, transparent);
+               border: 1px solid var(--rule);
+               border-radius: 4px; padding: 0.75rem 0.9rem; }
+.code-reveal pre { background: none; border: none; padding: 0; margin: 0;
+                   font-size: 0.62rem; line-height: 1.5; }
+.portrait-wrap.show-code .code-reveal { display: block; }
+.portrait-wrap.show-code pre.ascii-fig { opacity: 0.3; }
+.portrait-wrap.show-code .photo-reveal { opacity: 0 !important; }
+.portrait-fig figcaption { margin: 0.7rem 0 0; }
+
+.home-contact code { white-space: nowrap; }
+
+
+
+
+
+/* ============================================================
+   BLOG index tiers
+   ============================================================ */
+/* ---- post index: three tiers of prominence, all typographic ---- */
+/* featured: date, a solid serif title, a one-line dek */
+.post { margin: calc(var(--leading) * 1.8) 0 0; }
+.post:first-of-type { margin-top: calc(var(--leading) * 2.2); }
+.post-meta { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.02em;
+             color: var(--faint); margin: 0; text-indent: 0; }
+h3.post-title { font-family: var(--serif); font-style: normal; font-weight: 600;
+                font-size: 1.22rem; line-height: 1.3; margin: 0.3rem 0 0.35rem; }
+h3.post-title a { color: var(--ink); text-decoration: none; }
+h3.post-title a:hover { color: var(--accent); text-decoration: underline;
+                        text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.post-dek { margin: 0; color: var(--muted); text-indent: 0; }
+
+/* smaller notes: one line each — date, title, a muted why */
+ul.mini { list-style: none; padding: 0; margin: var(--leading) 0 0; }
+ul.mini li { margin: 0.65rem 0 0; text-indent: 0; }
+ul.mini .d { font-family: var(--mono); font-size: 0.72rem; color: var(--faint);
+             margin-right: 0.9ch; }
+ul.mini a { color: var(--ink); text-decoration: none; font-weight: 600; }
+ul.mini a:hover { color: var(--accent); text-decoration: underline; }
+ul.mini .why { color: var(--muted); }
+
+/* the demoted tail: compact, quiet, run-in links */
+.tail { font-size: 0.92rem; color: var(--muted); }
+.tail a { color: var(--muted); }
+.tail a:hover { color: var(--accent); }
+
+/* ============================================================
+   HIGHLIGHT.JS remap — typography as highlighting, never rainbow
+   (Franklin runs hljs on ```julia blocks; we restyle its classes)
+   ============================================================ */
+.hljs { background: none; color: var(--ink); padding: 0; }
+.hljs-keyword, .hljs-built_in, .hljs-literal { color: var(--ink); font-weight: 700; }
+.hljs-comment, .hljs-quote { color: var(--muted); font-style: italic; font-weight: 400; }
+.hljs-string { color: var(--accent); font-weight: 400; }
+/* numbers are just ink — the stock hljs theme paints every numeric literal,
+   which is colour noise, not a signal */
+.hljs-number { color: var(--ink); font-weight: 400; }
+.hljs-function, .hljs-params,
+.hljs-type, .hljs-symbol, .hljs-subst, .hljs-variable { color: var(--ink); font-weight: 400; }
+/* Rougier mapping: the popout slot goes to the rarest, most semantic marks —
+   Julia macros and Python decorators (both hljs `meta`), plus the spaced ~
+   of a probabilistic statement. declaration names are salient (bold). */
+.hljs-meta { color: var(--rare); font-weight: 400; }
+.hljs-title { color: var(--ink); font-weight: 700; }
+pre code .cp   { color: var(--faint); }     /* punctuation recedes */
+pre code .ctld { color: var(--rare); }      /* x ~ Dist(...) */
+
+
+/* ---- KaTeX display math in the system ---- */
+.katex { font-size: 1.06em; }
+.katex-display { margin: var(--leading) 0; overflow-x: auto; overflow-y: hidden; }
+
+
+/* ============================================================
+   FRANKLIN-SPECIFIC FIXES (found during the port)
+   ============================================================ */
+/* Franklin auto-wraps heading text in anchor links — keep headings ink */
+h1 a, h2 a, h3 a, h4 a { color: inherit; text-decoration: none; }
+h1 a:hover, h2 a:hover, h3 a:hover { color: inherit; text-decoration: none; }
+
+/* ---- dark mode: the sea becomes the northern lights ---- */
+pre.ocean .aur-g { color: color-mix(in srgb, var(--s3) 80%, transparent); }
+pre.ocean .aur-p { color: color-mix(in srgb, var(--accent) 75%, transparent); }
+pre.ocean .aur-w { color: var(--muted); }   /* header-grey sparkle, not white */
+
+/* ---- uniform theme fade: applied by the toggle for ~400ms so EVERY
+   colour-carrying property crosses together (backgrounds, text, borders,
+   knockout halos, code wells, SVG ink) — then removed so hover timing
+   is unaffected ---- */
+html.theme-fade, html.theme-fade *, html.theme-fade *::before, html.theme-fade *::after {
+  /* note: `color` deliberately NOT faded — slow-fading text reads worse
+     than a snap; surfaces, borders, halos, and figure ink cross together */
+  transition: background-color 0.35s ease,
+              border-color 0.35s ease, box-shadow 0.35s ease,
+              fill 0.35s ease, stroke 0.35s ease, opacity 0.35s ease !important;
 }
 
-/* ==================================================================
-    IMAGES in CONTENT
-================================================================== */
+/* ============================================================
+   LEGACY SVG SHIM — old inline diagrams carry the old palette as
+   presentation attributes; CSS outranks those, so this retro-themes
+   every diagram sitewide (dark mode included) with zero page edits.
+   ============================================================ */
+svg [fill="#004de6"]   { fill: var(--accent); }
+svg [stroke="#004de6"] { stroke: var(--accent); }
+svg [fill="#c0392b"]   { fill: var(--rare); }
+svg [stroke="#c0392b"] { stroke: var(--rare); }
+svg [fill="#333"]      { fill: var(--ink); }
+svg [stroke="#333"]    { stroke: var(--ink); }
+svg [fill="#555"], svg [fill="#666"], svg [fill="#888"] { fill: var(--muted); }
+svg [stroke="#555"], svg [stroke="#888"]                { stroke: var(--muted); }
+svg [fill="#aaa"], svg [fill="#bbb"], svg [fill="#ccc"] { fill: var(--faint); }
+svg [stroke="#aaa"], svg [stroke="#bbb"], svg [stroke="#ccc"] { stroke: var(--faint); }
+svg [fill="#f9f9f9"], svg [fill="#f0f0f0"], svg [fill="#f5f8ff"],
+svg [fill="#eef4ff"], svg [fill="#e8f0fe"]              { fill: var(--surface); }
+svg [fill="#d5d5d5"]   { fill: var(--rule-strong); }
+/* and the misspelled 'Berkley Mono' inside them falls back correctly */
+svg text { font-family: var(--mono); }
 
+/* content h1: pages carry their own title as a body h1 — style it as the
+   page-scale heading (small caps over the waterline rule), below masthead h1 */
+.franklin-content h1 { font-size: calc(var(--f-h2) * 1.05); letter-spacing: 0.045em;
+  word-spacing: -0.02em;
+  line-height: 1.25; margin: calc(var(--leading) * 2) 0 1.4rem;
+  padding: 0 0 0.7rem; border-bottom: 1.5px solid var(--ink); }
+
+/* Franklin wraps list-item text in <p>; keep it on the bullet's line */
+.franklin-content li p { display: inline; margin: 0; }
+.franklin-content ul:not([class]) li, .franklin-content ol:not([class]) li { margin: 0.4rem 0 0; }
+
+/* images scale down to the column (aspect preserved), never overflow;
+   smaller-than-column images stay their natural size, centred */
 .franklin-content img {
-  width: 70%;
-  text-align: center;
-  padding-left: 10%;
+  max-width: 100%; height: auto; display: block;
+  margin: var(--leading) auto;
 }
 
-.franklin-content .img-small img {
-  width: 50%;
-  text-align: center;
-  padding-left: 20%;
-}
+/* ---- code-language tabs (NumPyro / Turing pages), in the system's voice:
+   quiet mono labels over a hairline; the active tab carries the ink rule ---- */
+.code-tabs { margin: var(--leading) 0; }
+.code-tab-buttons { display: flex; gap: 1.4rem; border-bottom: 1px solid var(--rule); }
+.code-tab-btn { background: none; border: none; cursor: pointer;
+                font-family: var(--mono); font-size: 0.8rem; color: var(--muted);
+                padding: 0.3rem 0.1rem 0.45rem; margin-bottom: -1px;
+                border-bottom: 1.5px solid transparent; }
+.code-tab-btn:hover { color: var(--accent); }
+.code-tab-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
+.code-tab-content { display: none; }
+.code-tab-content.active { display: block; }
 
-/* ==================================================================
-    KATEX
-================================================================== */
+/* ...but the portrait's hover photo is an OVERLAY, not content media —
+   it must fill its box exactly, no content-image margins */
+.portrait-wrap .photo-reveal img { margin: 0; width: 100%; height: 100%; }
 
-body { counter-reset: eqnum; }
+/* ---- committed glyph-grid figures ({{gridfig ...}} hfun) ---- */
+pre.ascii-fig { background: none; border: none; border-radius: 0; padding: 0;
+  margin: var(--leading) auto; width: max-content; max-width: 100%;
+  overflow-x: auto; font-size: 0.62rem; line-height: 1.05; color: var(--ink); }
+/* ink mode (opt-in): boids each wear a series colour (heads bold, fresh
+   trail plain); boat marks in accent; old trails dissolve through the greys */
+pre.ascii-fig .acc { color: var(--accent); font-weight: 600; }
+pre.ascii-fig .mut { color: var(--muted); }
+pre.ascii-fig .fnt { color: var(--faint); }
+pre.ascii-fig .hd  { font-weight: 600; }
+pre.ascii-fig .bA { color: var(--s1); }  pre.ascii-fig .bB { color: var(--s2); }
+pre.ascii-fig .bC { color: var(--s3); }  pre.ascii-fig .bD { color: var(--s4); }
+pre.ascii-fig .bE { color: var(--s5); }  pre.ascii-fig .bF { color: var(--s6); }
+pre.ascii-fig .bG { color: var(--s7); }
+/* animated figures are keyboard-operable (space pauses, "." steps) */
+pre.ascii-fig:focus-visible { outline: 1px dashed var(--faint); outline-offset: 5px; }
+/* the inspect line: a terminal status bar under the figure, never a tooltip */
+samp.gridfig-status { display: block; width: max-content; max-width: 100%;
+  margin: 0.35rem auto var(--leading); font-family: var(--mono);
+  font-size: 0.68rem; color: var(--muted); min-height: 1em; }
+pre.ascii-fig[data-inspect] { margin-bottom: 0; }
 
-.katex { font-size: 1em !important; }
-
-.katex-display .katex {
-  /* Overwrite KaTeX settings. */
-  display: inline-block;
-
-  /* Allow display equations to wrap on small screens. */
-  white-space: normal;
-}
-
-.katex-display::after {
-  counter-increment: eqnum;
-  content: "(" counter(eqnum) ")";
-  position: relative;
-  float: right;
-  padding-right: 5px;
-}
-
-.nonumber .katex-display::after {
-  counter-increment: nothing;
-  content: "";
-}
-
-/* ==================================================================
-    CODE & HIGHLIGHT.JS
-================================================================== */
-
-code {
-  background-color: var(--block-background);
-  padding: 0.1em 0.2em;
-  border-radius: 2px;
-  font-size: var(--small);
-}
-
-/* .franklin-content code { */
-
-/* background-color: rgba(27,31,35,0.05); */
-
-/* padding: 0.1em 0.2em; */
-
-/* border-radius: 2px; */
-
-/* font-size: 90%; } */
-
-.hljs {
-  font-family: 'Berkley Mono', monospace;
-  font-size: var(--small);
-  line-height: 1.35em;
-  border-radius: 10px;
-}
-
-.hljs-meta,
-.hljs-metas,
-.hljs-metap { font-weight: bold; }
-
-.hljs-meta { color: rgb(25, 179, 51); }
-
-.hljs-metas { color: red; }
-
-.hljs-metap { color: rgb(51, 131, 231); }
-
-.code-output {
-  background: var(--output-background);
-  border: 1px dashed #dbdbdb;
-}
-
-/* ==================================================================
-    BOXES
-================================================================== */
-
-.franklin-content .colbox-blue {
-  background-color: #eef3f5;
-  padding-top: 5px;
-  padding-right: 10px;
-  padding-left: 10px;
-  padding-bottom: 5px;
-  margin-left: 5px;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  border-radius: 0 10px 10px 0;
-  border-left: 5px solid #4c9cf1;
-}
-
-
-/* ==================================================================
-    GRID FOR PORTFOLIO
-================================================================== */
-
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.grid-item {
-  position: relative;
-  border: 2px solid #f0f0f0;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #f9f9f9;
-  transition: transform 0.3s ease; /* Animation for the transform property */
-}
-
-.grid-image {
-  width: 100%;
-  height: 150px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.grid-title {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 10px 0;
-  color: whitesmoke;
-  text-align: center;
-  font-weight: bold;
-  /* existing styles */
-  color: white;
-  text-shadow: 
-    1px 1px 2px #555; /* soft shadow with a slight blur */
-  /* The background color will be added inline to allow for different colors */
-}
-
-.grid-item:hover {
-  transform: translateY(-5px); /* Moves the item up by 5px on hover */
-}
-
-/* ==================================================================
-    COLLAPSIBLE
-================================================================== */
-
-/* Style the button that is used to open and close the collapsible content */
-.collapsible {
-  background-color: #eee;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: inherit;
-}
-
-/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.active, .collapsible:hover {
-  background-color: #ccc;
-}
-
-/* Style the collapsible content. Note: hidden by default */
-.collapsiblecontent {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: #f1f1f1;
-}
+/* ---- sentinel hexes: SVGs exported from Julia painted with the design
+   tokens' literal light-mode values get remapped to the live tokens here,
+   so every exported plot follows light/dark automatically ---- */
+svg [stroke="#1A1917"] { stroke: var(--ink); }        svg [fill="#1A1917"] { fill: var(--ink); }
+svg [stroke="#6C6962"] { stroke: var(--muted); }      svg [fill="#6C6962"] { fill: var(--muted); }
+svg [stroke="#939089"] { stroke: var(--faint); }      svg [fill="#939089"] { fill: var(--faint); }
+svg [stroke="#C9C6BD"] { stroke: var(--rule-strong); }
+svg [fill="#F3F3F1"]   { fill: var(--surface); }      svg [fill="#FFFFFF"] { fill: var(--paper); }
+svg [stroke="#5E4489"] { stroke: var(--accent); }     svg [fill="#5E4489"] { fill: var(--accent); }
+svg [stroke="#B05F2A"] { stroke: var(--rare); }       svg [fill="#B05F2A"] { fill: var(--rare); }

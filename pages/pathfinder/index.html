@@ -5,61 +5,293 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
    <link rel="stylesheet" href="/libs/highlight/github.min.css">
-   
-  <link rel="preconnect" href="https://rsms.me/"> <!-- Add this line for Inter font -->
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css"> <!-- Add this line for Inter font -->
+ 
   <link rel="stylesheet" href="/css/franklin.css">
-  <link rel="stylesheet" href="/css/basic.css">
+  <!-- restore an explicitly chosen dark theme before first paint;
+       light stays the default (no stored choice, no OS preference) -->
+  <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
   <link rel="icon" href="/assets/favicon.png">
-   <title>Chain Binomial in Turing</title>  
-  
+  <title>Chain Binomial in Turing</title>
 </head>
 <body>
-  <header>
-<div class="blog-name"><a href="/">Jason Pekos</a></div>
-<nav>
+<nav class="topnav" aria-label="Site">
+  <pre class="ocean" id="oceanBar" aria-hidden="true"></pre>
+  <a class="brand" href="/">Jason Pekos</a>
   <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/menu1/">Projects & Blog</a></li>
-    <li><a href="/menu2/">Contact</a></li>
-    <li><a href="/menu3/">Teaching</a></li>
+    <li><a class="navlink" href="/">Home</a></li>
+    <li><a class="navlink" href="/menu1/">Projects &amp; Blog</a></li>
+    <li><a class="navlink" href="/menu2/">Contact</a></li>
+    <li><a class="navlink" href="/menu3/">Teaching</a></li>
+    <li><button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle colour theme" aria-pressed="false">◐ theme</button></li>
   </ul>
-  <img src="/assets/hamburger.svg" id="menu-icon">
 </nav>
-</header>
 
 
-<!-- Content appended here -->
+
+
+<!-- Franklin wraps the page content in .franklin-content itself -->
 <div class="franklin-content">
-<div class="page-foot">
-    JasonPekos. Last modified: July 22, 2024.
-    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
-</div>
+</div><footer class="colophon">
+  <div class="rule-top">
+    <p>JasonPekos. Last modified: August 10, 2026. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.</p>
+  </div>
+</footer>
 
-<!-- Collapsible button example -->
 <script>
-    var coll = document.getElementsByClassName("collapsible");
-    var i;
-    
-    for (i = 0; i < coll.length; i++) {
-      coll[i].addEventListener("click", function() {
-        this.classList.toggle("active");
-        var content = this.nextElementSibling;
-        if (content.style.display === "block") {
-          content.style.display = "none";
-        } else {
-          content.style.display = "block";
-        }
+/* theme toggle — light is the default, dark is opt-in; an explicit choice
+   persists across pages (restored before first paint in head.html) */
+(function () {
+  var btn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  var fadeTimer = null;
+  if (root.getAttribute('data-theme') === 'dark') btn.setAttribute('aria-pressed', 'true');
+  btn.addEventListener('click', function () {
+    root.classList.add('theme-fade');          // everything crosses together
+    var dark = root.getAttribute('data-theme') !== 'dark';
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    btn.setAttribute('aria-pressed', String(dark));
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(function () { root.classList.remove('theme-fade'); }, 420);
+  });
+})();
+
+/* Rougier pass: fade punctuation, popout the sampling ~ — runs after hljs,
+   walks TEXT nodes only (never inside strings, comments, or macro spans) */
+window.addEventListener("load", function () {
+  requestAnimationFrame(function () {
+    document.querySelectorAll("pre code").forEach(function (code) {
+      var tw = document.createTreeWalker(code, NodeFilter.SHOW_TEXT, null);
+      var nodes = [];
+      while (tw.nextNode()) {
+        var el = tw.currentNode.parentElement;
+        if (el && el.closest(".hljs-string, .hljs-comment, .hljs-meta, .cp, .ctld")) continue;
+        nodes.push(tw.currentNode);
+      }
+      nodes.forEach(function (n) {
+        var t = n.nodeValue;
+        if (!/[()\[\]{},;]| ~ /.test(t)) return;
+        var frag = document.createDocumentFragment();
+        t.split(/([()\[\]{},;]| ~ )/).forEach(function (part) {
+          if (!part) return;
+          if (part === " ~ ") {
+            frag.append(" ");
+            var m = document.createElement("span");
+            m.className = "ctld"; m.textContent = "~";
+            frag.append(m); frag.append(" ");
+          } else if (/^[()\[\]{},;]$/.test(part)) {
+            var sp = document.createElement("span");
+            sp.className = "cp"; sp.textContent = part;
+            frag.append(sp);
+          } else frag.append(part);
+        });
+        n.replaceWith(frag);
       });
+    });
+  });
+});
+
+/* code-language tabs (NumPyro / Turing) */
+document.querySelectorAll('.code-tabs').forEach(function (group) {
+  var buttons = group.querySelectorAll('.code-tab-btn');
+  var panels = group.querySelectorAll('.code-tab-content');
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      buttons.forEach(function (b) { b.classList.remove('active'); });
+      panels.forEach(function (pn) { pn.classList.remove('active'); });
+      btn.classList.add('active');
+      var target = group.querySelector('#' + btn.dataset.tab);
+      if (target) target.classList.add('active');
+    });
+  });
+});
+
+/* mark the active nav link */
+(function () {
+  var here = location.pathname.replace(/index\.html$/, '');
+  document.querySelectorAll('.topnav a.navlink').forEach(function (a) {
+    var p = a.getAttribute('href');
+    if (p === here || (p !== '/' && here.indexOf(p) === 0) ||
+        (p === '/menu1/' && here.indexOf('/pages/') === 0)) {
+      a.setAttribute('aria-current', 'page');
     }
-  </script>
-  <!-- End collapsible button example -->
-</div><!-- CONTENT ENDS HERE -->
-    
-    
-        
+  });
+})();
+
+/* title-bar water — still, blank water; every so often a boat
+   crosses (seen from above), trailing a Kelvin-ish wake that rings
+   outward and dissipates back to stillness. seeded, so deterministic. */
+(function () {
+  var el = document.getElementById("oceanBar");
+  if (!el) return;
+  var last = null;   // last-painted frame; identical frames skip the innerHTML write
+  function paint(out) { if (out !== last) { el.innerHTML = out; last = out; } }
+  var s = 77041 >>> 0;
+  function rand() { s = (1664525 * s + 1013904223) >>> 0; return s / 4294967296; }
+
+  var cw, lh, cols, rows;
+  function measure() {
+    var probe = document.createElement("span");
+    probe.textContent = "MMMMMMMMMM";
+    probe.style.visibility = "hidden";
+    el.appendChild(probe);
+    cw = probe.getBoundingClientRect().width / 10;
+    el.removeChild(probe);
+    lh = parseFloat(getComputedStyle(el).lineHeight);
+    cols = Math.max(20, Math.ceil(el.clientWidth / cw));
+    rows = Math.max(4, Math.floor(el.clientHeight / lh));
+  }
+  measure();
+  addEventListener("resize", function () { measure(); });
+
+  var V = 24;      // boat speed, columns / second
+  var TAU = 2.4;   // wake decay time (s)
+  var RING = 1.6;  // ripple spread speed (rows / second)
+  var pass = null, nextAt = 2.0;
+
+  // deterministic per-cell noise, stable within a pass (ragged, not fizzing)
+  function cellNoise(c, r, seed) {
+    var x = (c * 73856093 ^ r * 19349663 ^ seed * 83492791) >>> 0;
+    x = ((x ^ (x >>> 13)) * 1274126177) >>> 0;
+    return ((x ^ (x >>> 16)) >>> 0) / 4294967296;
+  }
+
+  function frame(nowMs) {
+    var now = nowMs / 1000;
+    if (!pass && now >= nextAt) {
+      // visual entry angle ~uniform in ±65°; steep tracks extend off-screen,
+      // so the boat appears to sail in over the top (or bottom) edge
+      var phi = (rand() * 2 - 1) * 1.13;             // radians, ±~65°
+      pass = { t0: now,
+               cx: cols * (0.2 + rand() * 0.6),      // a point the track
+               cy: rows * (0.2 + rand() * 0.6),      //   crosses in-band
+               slope: Math.tan(phi) / 1.76,          // rows/col (cell aspect)
+               ltr: rand() < 0.5,
+               seed: (rand() * 1e9) | 0 };
+    }
+    var xb = null;
+    if (pass) {
+      var dt = now - pass.t0;
+      xb = pass.ltr ? dt * V : cols - dt * V;
+      if (dt > cols / V + TAU * 2.5) {               // boat gone, wake stilled
+        pass = null; xb = null;
+        nextAt = now + 6 + rand() * 10;              // next crossing in 6-16s
+      }
+    }
+    // row of the boat's track at column c — a line through (cx, cy);
+    // rows outside the band are simply never rendered (the mask)
+    function trackRow(c) {
+      return pass.cy + pass.slope * (c - pass.cx);
+    }
+    var out = "";
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var ch = " ";
+        if (xb !== null) {
+          var behind = pass.ltr ? xb - c : c - xb;   // columns behind the bow
+          var rc = trackRow(c);
+          if (behind >= -0.6 && behind < 1.4 && Math.abs(r - rc) < 0.51) {
+            ch = '<span class="boat">@</span>';      // the boat, in accent
+          } else if (behind >= 1.4 && behind < 4 && Math.abs(r - rc) < 0.51) {
+            ch = '<span class="boat">=</span>';      // churn at the stern
+          } else if (behind >= 0) {
+            var age = behind / V;                    // seconds since the bow passed
+            var u = cellNoise(c, r, pass.seed);      // ragged arms, uneven fade
+            var spread = RING * (0.8 + 0.5 * cellNoise(c, 9999, pass.seed));
+            var arm = Math.abs(r - rc) - spread * age;
+            var ring = Math.exp(-(arm * arm) / 0.6)
+                     * Math.exp(-age / TAU) * (0.55 + 0.9 * u);
+            if (ring > 0.5) ch = "~";
+            else if (ring > 0.22) ch = "-";
+            else if (ring > 0.16 && u > 0.75) ch = "-";   // stray ripple flecks
+            if (ch !== " ") {                             // fresh wake runs purple;
+              var u2 = cellNoise(c + 101, r + 57, pass.seed + 7);
+              if (u2 < Math.exp(-behind / 14)) {          //   odds fade with distance
+                ch = '<span class="ripA">' + ch + '</span>';
+              }
+            }
+          }
+        }
+        out += ch;
+      }
+      if (r < rows - 1) out += "\n";
+    }
+    paint(out);
+  }
+
+  /* dark mode gets the northern lights; light mode keeps the boats.
+     three sinuous curtains, each a Gaussian ribbon around a drifting
+     S-shaped centreline: green core, purple fringe, slow fade in/out */
+  var RIBBONS = [
+    { f1: 1.3, f2: 2.6, a1: 0.30, a2: 0.14, s1:  0.045, s2: -0.070, w: 1.15, T: 63, ph: 0.0 },
+    { f1: 0.9, f2: 2.1, a1: 0.26, a2: 0.12, s1: -0.035, s2:  0.055, w: 0.95, T: 89, ph: 2.4 },
+    { f1: 1.7, f2: 3.4, a1: 0.22, a2: 0.10, s1:  0.060, s2: -0.045, w: 0.80, T: 76, ph: 4.4 }
+  ];
+  function aurora(nowMs) {
+    var t = nowMs / 1000, out = "";
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var x = c / cols, core = 0, fringe = 0;
+        for (var i = 0; i < RIBBONS.length; i++) {
+          var q = RIBBONS[i];
+          // gated life-cycle: each ribbon is dark ~80% of its period and
+          // blooms smoothly through the rest — most of the time, no aurora
+          var raw = Math.sin(6.283 * t / q.T + q.ph);
+          if (raw <= 0.68) continue;
+          var life = Math.pow((raw - 0.68) / 0.32, 1.3);
+          var y = rows * (0.5
+                + q.a1 * Math.sin(6.283 * (q.f1 * x) + q.s1 * 6.283 * t + q.ph)
+                + q.a2 * Math.sin(6.283 * (q.f2 * x) + q.s2 * 6.283 * t + 1.7 * q.ph));
+          var env = 0.6 + 0.4 * Math.sin(6.283 * (0.8 * x) + 0.11 * t + q.ph); // glow drifts along the ribbon
+          var d = Math.abs(r - y) / q.w;
+          var g = Math.exp(-d * d) * life * env;
+          core += g;
+          fringe += Math.exp(-(d - 1.9) * (d - 1.9) / 1.4) * life * env * 0.7;
+        }
+        var b = Math.max(core, fringe * 0.85);
+        if (b <= 0.09) { out += " "; continue; }
+        // massive thinning: most lit cells stay dark; survival odds scale
+        // with brightness and twinkle slowly per cell
+        var u = cellNoise(c, r, 424243);
+        var tw = 0.6 + 0.4 * Math.sin(t * (0.4 + 0.5 * u) + u * 40);
+        if (u > b * 0.5 * tw) { out += " "; continue; }
+        var ch = b > 0.62 ? "|" : b > 0.38 ? "!" : b > 0.2 ? ":" : ".";
+        var cls = (b > 0.7 && u > 0.18) ? "aur-w"              // muted-grey sparkle (see .aur-w)
+                : (core >= fringe ? "aur-g" : "aur-p");
+        out += '<span class="' + cls + '">' + ch + "</span>";
+      }
+      if (r < rows - 1) out += "\n";
+    }
+    paint(out);
+  }
+  function tick(now) {
+    if (document.documentElement.getAttribute("data-theme") === "dark") aurora(now);
+    else frame(now);
+  }
+  tick(0);
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var visible = true, paused = reduced;
+  if (!reduced) {
+    if ("IntersectionObserver" in window)
+      new IntersectionObserver(function (es) {
+        visible = es[es.length - 1].isIntersecting;   // newest record, not oldest
+        if (visible && !paused) tick(performance.now());   // catch theme flips
+      }).observe(el);
+    setInterval(function () {
+      if (document.hidden) return;                    // no repaints in hidden tabs
+      if (visible && !paused) tick(performance.now());
+    }, 90);
+    el.addEventListener("pointerup", function () { paused = !paused; });
+    el.title = "click — pause";
+  }
+  var tb = document.getElementById("themeBtn");
+  if (tb) tb.addEventListener("click", function () { setTimeout(function () { tick(0); }, 0); });
+})();
+</script>
 
 
-    
-  </body>
+ 
+
+ 
+</body>
 </html>
