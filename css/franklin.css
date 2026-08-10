@@ -144,6 +144,11 @@ h3 { font-size: var(--f-h3); margin: 3rem 0 0.75rem; }
 .franklin-content p { text-align: justify; hyphens: auto; -webkit-hyphens: auto;
              text-wrap: pretty; word-break: break-word;
              hyphenate-limit-chars: 3; }
+/* justification needs ~60ch to set evenly; at phone measures (~40ch) it
+   opens rivers that hyphenation can't close — go ragged instead */
+@media (max-width: 40rem) {
+  .franklin-content p { text-align: left; }
+}
 
 /* weight hierarchy: solid body, real bold, lighter secondary text */
 strong, b { font-weight: var(--fw-bold); }
