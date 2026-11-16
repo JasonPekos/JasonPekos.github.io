@@ -14,6 +14,9 @@
 
 \newcommand{\R}{\mathbb R} \newcommand{\scal}[1]{\langle #1 \rangle}
 
+<!-- \sidenote{text}: numbered note in the right margin, folding inline on narrow screens -->
+\newcommand{\sidenote}[1]{~~~<span class="sn-ref"></span><span class="sidenote">~~~#1~~~</span>~~~}
+
 <!-- \collaps renders as a native <details> element -->
 \newcommand{\collaps}[2]{
 ~~~<details><summary>~~~ #1 ~~~</summary>~~~

@@ -217,16 +217,19 @@ pre code { background: none; padding: 0; font-size: inherit; }
 /* ============================================================
    TABLES
    ============================================================ */
-/* prop-web tables: strong small-caps head over one ink rule; body rows carry
-   no borders — spacing alone separates them.
+/* prop-web tables: strong small-caps head over one thin grey rule (lighter
+   than a section break, so a table under a heading does not read as a second
+   break); body rows carry no borders — spacing alone separates them. A table
+   stands off the prose by a leading and a half above and below.
    NB: Franklin emits bare <table><tr><th> (the parser implies tbody, never
    thead), so the header row is targeted by position, not by thead. */
-table { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+table { border-collapse: collapse; font-size: 0.85rem; width: 100%;
+        margin: calc(var(--leading) * 1.5) 0; }
 th, td { text-align: left; padding: 0.45rem 0.7rem 0.45rem 0;
          vertical-align: top; }
 table tr:first-child th { font-family: var(--serif-sc); font-variant: all-small-caps;
            font-size: 1.05em; font-weight: 500; letter-spacing: 0.075em;
-           color: var(--ink); border-bottom: 1.5px solid var(--ink); }
+           color: var(--ink); border-bottom: 1px solid var(--rule-strong); }
 tbody th { font-weight: 600; padding-right: 1rem; }
 
 
@@ -327,7 +330,7 @@ details > p:not(:last-child) { margin-bottom: var(--leading); }
    column, so notes fold inline (as bordered insets) instead of floating */
 @media (max-width: 69rem) {
   .sidenote, .marginnote {
-    float: none; width: auto; max-width: 100%;
+    display: block; float: none; width: auto; max-width: 100%;
     margin: 0.7rem 0; padding: 0.5rem 0 0.5rem 0.9rem;
     border-left: 2px solid var(--rule); background: var(--surface);
   }
@@ -536,6 +539,21 @@ svg text { font-family: var(--mono); }
 .code-tab-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
 .code-tab-content { display: none; }
 .code-tab-content.active { display: block; }
+
+/* figure tabs: the same group around a figure, its labels tucked under the
+   figure at the right, with no rule (a figure and the sketch it came from) */
+.code-tabs.fig-tabs { display: flex; flex-direction: column-reverse; }
+.fig-tabs .code-tab-buttons { border-bottom: none; justify-content: flex-end; gap: 1rem; }
+.fig-tabs .code-tab-btn { font-size: 0.72rem; padding: 0; margin: 0; border-bottom: none; }
+.fig-tabs .code-tab-content img { margin-bottom: 0.4rem; }
+
+/* themed figures: a light and a dark render sit side by side in the markup and
+   the theme shows one of them. hand sketches are dark lines on white, so the
+   dark theme inverts them and lets the black ground fall away into the paper */
+img.fig-dark { display: none; }
+:root[data-theme="dark"] img.fig-light { display: none; }
+:root[data-theme="dark"] img.fig-dark { display: block; }
+:root[data-theme="dark"] img.fig-sketch { filter: invert(1); mix-blend-mode: screen; }
 
 /* ...but the portrait's hover photo is an OVERLAY, not content media —
    it must fill its box exactly, no content-image margins */

@@ -3,6 +3,15 @@ title = "Projects & Blog"
 date = Date(2019, 3, 22)
 +++
 
+## In progress
+
+~~~
+<ul class="mini">
+  <li><span class="d">2026-11</span><a href="/pages/BayesEx/PPLEval">Aligning models in different PPLs</a> <span class="why">— WIP.</span></li>
+  <li><span class="d">2026-08</span><a href="/pages/BayesEx/Generic/Reparam1">Generic Non-Centred Parameterizations</a> <span class="why">— WIP.</span></li>
+</ul>
+~~~
+
 ## Misc / legacy
 
 ~~~
