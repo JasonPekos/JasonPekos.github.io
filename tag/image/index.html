@@ -65,16 +65,16 @@ window.addEventListener("load", function () {
       }
       nodes.forEach(function (n) {
         var t = n.nodeValue;
-        if (!/[()\[\]{},;]| ~ /.test(t)) return;
+        if (!/[()<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex"></annotation></semantics></math></span><span class="katex-html" aria-hidden="true"></span></span></span>{},;]| ~ /.test(t)) return;
         var frag = document.createDocumentFragment();
-        t.split(/([()\[\]{},;]| ~ )/).forEach(function (part) {
+        t.split(/([()<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex"></annotation></semantics></math></span><span class="katex-html" aria-hidden="true"></span></span></span>{},;]| ~ )/).forEach(function (part) {
           if (!part) return;
           if (part === " ~ ") {
             frag.append(" ");
             var m = document.createElement("span");
             m.className = "ctld"; m.textContent = "~";
             frag.append(m); frag.append(" ");
-          } else if (/^[()\[\]{},;]$/.test(part)) {
+          } else if (/^[()<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex"></annotation></semantics></math></span><span class="katex-html" aria-hidden="true"></span></span></span>{},;]$/.test(part)) {
             var sp = document.createElement("span");
             sp.className = "cp"; sp.textContent = part;
             frag.append(sp);
@@ -284,7 +284,10 @@ document.querySelectorAll('.code-tabs').forEach(function (group) {
 })();
 </script>
 
+ 
 
+
+ 
  
 
  

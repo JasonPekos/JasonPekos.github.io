@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:media="http://search.yahoo.com/mrss/"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:georss="http://www.georss.org/georss">
+
+  <channel>
+    <title>
+      <![CDATA[  personal website  ]]>
+    </title>
+    <link> https://JasonPekos.github.io/ </link>
+    <description>
+      <![CDATA[  personal website  ]]>
+    </description>
+    <atom:link
+      href="https://JasonPekos.github.io/feed.xml"
+      rel="self"
+      type="application/rss+xml" />
+
+
+<item>
+  <title>
+    <![CDATA[  Aligning models in different PPLs  ]]>
+  </title>
+  <link> https://JasonPekos.github.io/pages/BayesEx/PPLEval/index.html </link>
+  <guid> https://JasonPekos.github.io/pages/BayesEx/PPLEval/index.html </guid>
+  <description>
+    <![CDATA[  RSS  ]]>
+  </description>  
+    
+  <pubDate>Sat, 14 Nov 2026 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>JasonPekos</atom:name>
+  </atom:author>
+        
+</item>
+
+<item>
+  <title>
+    <![CDATA[  Generic Non-Centred Parameterizations  ]]>
+  </title>
+  <link> https://JasonPekos.github.io/pages/BayesEx/Generic/Reparam1/index.html </link>
+  <guid> https://JasonPekos.github.io/pages/BayesEx/Generic/Reparam1/index.html </guid>
+  <description>
+    <![CDATA[  What&#39;s really going on here.  ]]>
+  </description>  
+    
+  <pubDate>Mon, 10 Aug 2026 00:00:00 +0000</pubDate>  
+  
+  
+  <atom:author>
+    <atom:name>JasonPekos</atom:name>
+  </atom:author>
+        
+</item>
+</channel></rss>

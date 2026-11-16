@@ -48,7 +48,7 @@
 </li>
 <li><p>The state space model here is non-linear and non-Gaussian, so the types of filtering methods we can use to compute pseudo-marginals &#40;if we go that route&#41; are restricted.</p>
 </li>
-<li><p>The parameter space itself –- e.g. the slice of the posterior composed of just &#40;<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>, <code>prop_sus</code>, <code>init_inf</code>, ...&#41; can exhibit poor geometry for many MCMC samplers.</p>
+<li><p>The parameter space itself — e.g. the slice of the posterior composed of just &#40;<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span>, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>, <code>prop_sus</code>, <code>init_inf</code>, ...&#41; can exhibit poor geometry for many MCMC samplers.</p>
 </li>
 </ol>
 <h2 id="a_turing_model"><a href="#a_turing_model" class="header-anchor">A Turing Model</a></h2>
@@ -91,7 +91,7 @@
 <p>We want some data to fit this to, and there&#39;s no nicer data than data from the prior&#33;</p>
 <pre><code class="julia hljs">model = SIR(zeros(<span class="hljs-number">100</span>), <span class="hljs-number">500</span>) <span class="hljs-comment"># 100 timesteps, 500 pop.</span>
 prior_chain = sample(model, Prior(), <span class="hljs-number">100</span>) <span class="hljs-comment"># 100 prior samples</span></code></pre>
-<p>This gives us a chain with <code>1 &#43; 2*len&#40;dat&#41;</code> parameters –- Beta, and then latent infections &#40;<code>infections&#91;t&#93;&#41;</code>&#41; and recoveries &#40;<code>recoveries&#91;t&#93;</code>&#41;. We&#39;d like these infections and recoveries in a vector for plotting, so lets make a quick function to parse the chain into a nicer form:</p>
+<p>This gives us a chain with <code>1 &#43; 2*len&#40;dat&#41;</code> parameters — Beta, and then latent infections &#40;<code>infections&#91;t&#93;&#41;</code>&#41; and recoveries &#40;<code>recoveries&#91;t&#93;</code>&#41;. We&#39;d like these infections and recoveries in a vector for plotting, so lets make a quick function to parse the chain into a nicer form:</p>
 <pre><code class="julia hljs"><span class="hljs-keyword">function</span> parse_chain(chain, index)
     s = DataFrame(chain)[index, :]
     inf_array = <span class="hljs-built_in">Vector</span>(group(chain, :infections).value[index, :])
@@ -111,7 +111,7 @@ title!(<span class="hljs-string">&quot;Daily Infection Data&quot;</span>)</code>
 <p>Ok, we have the model, we have the data — let&#39;s try conditioning the model on the data&#33;</p>
 </div><footer class="colophon">
   <div class="rule-top">
-    <p>JasonPekos. Last modified: August 10, 2026. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.</p>
+    <p>JasonPekos. Last modified: November 16, 2026. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.</p>
   </div>
 </footer>
 

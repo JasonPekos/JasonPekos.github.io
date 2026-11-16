@@ -69,7 +69,7 @@
 module load R <span class="hljs-comment"># Comment out if R is not an environment module.</span>
 <span class="hljs-comment"># ulimit -v $(( 1024 * {{ memory | 3G }} ))</span>
 CMQ_AUTH={{ auth }} R --no-save --no-restore -e <span class="hljs-string">&#x27;clustermq:::worker(&quot;{{ master }}&quot;)&#x27;</span></code></pre>
-<h2 id="also_on_the_cluster_-_adding_the_r_module_you_want_to_your_bashrc"><a href="#also_on_the_cluster_-_adding_the_r_module_you_want_to_your_bashrc" class="header-anchor">Also on the cluster –- Adding the R module you want to your bashrc.</a></h2>
+<h2 id="also_on_the_cluster_adding_the_r_module_you_want_to_your_bashrc"><a href="#also_on_the_cluster_adding_the_r_module_you_want_to_your_bashrc" class="header-anchor">Also on the cluster — Adding the R module you want to your bashrc.</a></h2>
 <p>You need to add the R module you want to use to the end of your bashrc. If you don&#39;t, you&#39;ll fail with</p>
 <pre><code class="bash hljs">Error <span class="hljs-keyword">in</span> initialize(...) : 
   Remote R process did not respond after 5000 seconds. Check your SSH server <span class="hljs-built_in">log</span>.</code></pre>
@@ -95,7 +95,7 @@ fx <span class="hljs-operator">=</span> <span class="hljs-keyword">function</spa
 Q<span class="hljs-punctuation">(</span>fx<span class="hljs-punctuation">,</span> x<span class="hljs-operator">=</span><span class="hljs-number">1</span><span class="hljs-operator">:</span><span class="hljs-number">3</span><span class="hljs-punctuation">,</span> n_jobs<span class="hljs-operator">=</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span></code></pre>
 </div><footer class="colophon">
   <div class="rule-top">
-    <p>JasonPekos. Last modified: August 10, 2026. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.</p>
+    <p>JasonPekos. Last modified: November 16, 2026. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.</p>
   </div>
 </footer>
 

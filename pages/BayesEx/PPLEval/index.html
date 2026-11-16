@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="/libs/katex/katex.min.css">
+ 
+   <link rel="stylesheet" href="/libs/highlight/github.min.css">
+ 
+  <link rel="stylesheet" href="/css/franklin.css">
+  <!-- restore an explicitly chosen dark theme before first paint;
+       light stays the default (no stored choice, no OS preference) -->
+  <script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
+  <link rel="icon" href="/assets/favicon.png">
+  <title>Aligning models in different PPLs</title>
+</head>
+<body>
+<nav class="topnav" aria-label="Site">
+  <pre class="ocean" id="oceanBar" aria-hidden="true"></pre>
+  <a class="brand" href="/">Jason Pekos</a>
+  <ul>
+    <li><a class="navlink" href="/">Home</a></li>
+    <li><a class="navlink" href="/menu1/">Projects &amp; Blog</a></li>
+    <li><a class="navlink" href="/menu2/">Contact</a></li>
+    <li><a class="navlink" href="/menu3/">Teaching</a></li>
+    <li><button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle colour theme" aria-pressed="false">◐ theme</button></li>
+  </ul>
+</nav>
+
+
+
+
+<!-- Franklin wraps the page content in .franklin-content itself -->
+<div class="franklin-content">
+<h1 id="aligning_models_in_different_ppls"><a href="#aligning_models_in_different_ppls" class="header-anchor">Aligning models in different PPLs</a></h1>
+<p>Say you have a model in Stan, or PyMC. Maybe this &quot;model&quot; is multiple models in a trenchcoat — something like a few thousand lines and a few dozen if statements. You&#39;ve heard of something <a href="https://statmodeling.stat.columbia.edu/2025/10/03/its-a-jax-jax-jax-jax-world/">cool</a> <a href="https://examples.rxinfer.com/categories/advanced_examples/gp_regression_by_ssm/">in</a> <a href="https://num.pyro.ai/en/stable/funsor.html">another</a> <a href="https://turinglang.org/docs/usage/submodels/">PPL</a>. Or maybe you want to see what the corresponding syntax would look like, or how fast it would run. It&#39;s probably not worth it to port your codebase over to check, but an LLM might be pretty good at this job. LLMs are best when they have a <a href="https://www.anthropic.com/research/building-c-compiler">verifiable</a> <a href="https://terrytao.wordpress.com/2026/09/12/after-math/">test harness</a> — some ability to check their work against a source of truth.<span class="sn-ref"></span><span class="sidenote"> I think an underdiscussed part of the math / coding apocalypse is the ability for models to check against a source of truth <em>at inference time</em>, not just during post-training, e.g. against tests/compilers &#40;coding&#41; or Lean &#40;math&#41;. This probably has implications for AI timelines in biology, AI research, materials science, computational statistics, where verification can be longer than &quot;instant&quot;.</span> Statistical modelling is a little squishy, so in many cases, we can&#39;t get nearly as good a certificate of correctness. In this case, however, we can.</p>
+<h2 id="the_basic_idea"><a href="#the_basic_idea" class="header-anchor">The basic idea</a></h2>
+<p>Consider <a href="https://statmodeling.stat.columbia.edu/2019/10/15/a-heart-full-of-hatred-8-schools-edition/">eight-schools &#40;non-centred edition&#41;</a>:<span class="sn-ref"></span><span class="sidenote"> Dan Simpson might not like 8schools, but I&#39;m using it here because: &#40;1&#41; I love a classic, &#40;2&#41; it has a constrained parameter and a transformed parameter, &#40;3&#41; lazy.</span></p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mi>τ</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>∼</mo><mtext>HalfCauchy</mtext><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mi>μ</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>∼</mo><mi mathvariant="script">N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><msub><mi>z</mi><mi>j</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>∼</mo><mi mathvariant="script">N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><msub><mi>θ</mi><mi>j</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mi>μ</mi><mo>+</mo><mi>τ</mi><msub><mi>z</mi><mi>j</mi></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><msub><mi>y</mi><mi>j</mi></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>∼</mo><mi mathvariant="script">N</mi><mo stretchy="false">(</mo><msub><mi>θ</mi><mi>j</mi></msub><mo separator="true">,</mo><msub><mi>σ</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+\tau &amp;\sim \text{HalfCauchy}(0, 5) \\
+\mu &amp;\sim \mathcal{N}(0, 5) \\
+z_j &amp;\sim \mathcal{N}(0, 1) \\
+\theta_j &amp;= \mu + \tau z_j \\
+y_j &amp;\sim \mathcal{N}(\theta_j, \sigma_j)
+\end{aligned}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:7.5em;vertical-align:-3.5em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4em;"><span style="top:-6.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span></span></span><span style="top:-4.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">μ</span></span></span><span style="top:-3.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-1.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-0.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.5em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:4em;"><span style="top:-6.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord text"><span class="mord">HalfCauchy</span></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mclose">)</span></span></span><span style="top:-4.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathcal" style="margin-right:0.14736em;">N</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mclose">)</span></span></span><span style="top:-3.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathcal" style="margin-right:0.14736em;">N</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span><span style="top:-1.66em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathnormal">μ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span><span style="top:-0.16em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathcal" style="margin-right:0.14736em;">N</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:3.5em;"><span></span></span></span></span></span></span></span></span></span></span></span>
+<p>We can implement this in a few PPLs:<span class="sn-ref"></span><span class="sidenote"> Stan model taken from <a href="https://github.com/stan-dev/posteriordb/blob/ac100554d3fd0bbbc58ca8ea08ccabc0486c7f51/posterior_database/models/stan/eight_schools_noncentered.stan">posteriordb</a>.</span></p>
+
+<div class="code-tabs">
+  <div class="code-tab-buttons">
+    <button class="code-tab-btn active" data-tab="c1-turing">Turing</button>
+    <button class="code-tab-btn" data-tab="c1-stan">Stan</button>
+    <button class="code-tab-btn" data-tab="c1-numpyro">NumPyro</button>
+  </div>
+  <div id="c1-turing" class="code-tab-content active">
+
+<pre><code class="julia hljs"><span class="hljs-meta">@model</span> <span class="hljs-keyword">function</span> eight_schools_noncentered(J, y, sigma)
+    tau ~ truncated(Cauchy(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>); lower = <span class="hljs-number">0</span>)
+    mu ~ Normal(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>)
+    theta_trans ~ MvNormal(zeros(J), I)
+    theta := mu .+ tau .* theta_trans
+    y ~ MvNormal(theta, Diagonal(sigma .^ <span class="hljs-number">2</span>))
+<span class="hljs-keyword">end</span></code></pre>
+
+  </div>
+  <div id="c1-stan" class="code-tab-content">
+
+<pre><code class="stan hljs"><span class="hljs-title">data</span> {
+  <span class="hljs-type">int</span>&lt;<span class="hljs-keyword">lower</span>=<span class="hljs-number">0</span>&gt; J; <span class="hljs-comment">// number of schools</span>
+  <span class="hljs-type">array</span>[J] <span class="hljs-type">real</span> y; <span class="hljs-comment">// estimated treatment</span>
+  <span class="hljs-type">array</span>[J] <span class="hljs-type">real</span>&lt;<span class="hljs-keyword">lower</span>=<span class="hljs-number">0</span>&gt; sigma; <span class="hljs-comment">// std of estimated effect</span>
+}
+<span class="hljs-title">parameters</span> {
+  <span class="hljs-type">vector</span>[J] theta_trans; <span class="hljs-comment">// transformation of theta</span>
+  <span class="hljs-type">real</span> mu; <span class="hljs-comment">// hyper-parameter of mean</span>
+  <span class="hljs-type">real</span>&lt;<span class="hljs-keyword">lower</span>=<span class="hljs-number">0</span>&gt; tau; <span class="hljs-comment">// hyper-parameter of sd</span>
+}
+<span class="hljs-title">transformed</span> <span class="hljs-title">parameters</span> {
+  <span class="hljs-type">vector</span>[J] theta;
+  <span class="hljs-comment">// original theta</span>
+  theta = theta_trans * tau + mu;
+}
+<span class="hljs-title">model</span> {
+  theta_trans ~ <span class="hljs-built_in">normal</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+  y ~ <span class="hljs-built_in">normal</span>(theta, sigma);
+  mu ~ <span class="hljs-built_in">normal</span>(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>); <span class="hljs-comment">// a non-informative prior</span>
+  tau ~ <span class="hljs-built_in">cauchy</span>(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>);
+}</code></pre>
+
+  </div>
+  <div id="c1-numpyro" class="code-tab-content">
+
+<pre><code class="python hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">eight_schools_noncentered</span>(<span class="hljs-params">J, sigma, y=<span class="hljs-literal">None</span></span>):
+    tau = numpyro.sample(<span class="hljs-string">&quot;tau&quot;</span>, dist.HalfCauchy(<span class="hljs-number">5.0</span>))
+    mu = numpyro.sample(<span class="hljs-string">&quot;mu&quot;</span>, dist.Normal(<span class="hljs-number">0.0</span>, <span class="hljs-number">5.0</span>))
+    <span class="hljs-keyword">with</span> numpyro.plate(<span class="hljs-string">&quot;school&quot;</span>, J):
+        theta_trans = numpyro.sample(<span class="hljs-string">&quot;theta_trans&quot;</span>, dist.Normal(<span class="hljs-number">0.0</span>, <span class="hljs-number">1.0</span>))
+        theta = numpyro.deterministic(<span class="hljs-string">&quot;theta&quot;</span>, mu + tau * theta_trans)
+        numpyro.sample(<span class="hljs-string">&quot;y&quot;</span>, dist.Normal(theta, sigma), obs=y)</code></pre>
+
+  </div>
+</div>
+
+<p>Are these implementations the same? What does it mean for implementations to be &quot;the same&quot;? Some PPLs work differently, but all of the above allow us to evaluate the joint log density of the sampled parameters <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Ψ</mi></mrow><annotation encoding="application/x-tex">\Psi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Ψ</span></span></span></span> and data <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span></span></span>:</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><munder><munder><mrow><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi>τ</mi><mo stretchy="false">)</mo><mo>+</mo><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi>μ</mi><mo stretchy="false">)</mo><mo>+</mo><munder><mo>∑</mo><mi>j</mi></munder><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><msub><mi>z</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><mo stretchy="true">⏟</mo></munder><mtext>prior</mtext></munder><mo>+</mo><munder><munder><mrow><munder><mo>∑</mo><mi>j</mi></munder><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><msub><mi>y</mi><mi>j</mi></msub><mo>∣</mo><msub><mi>θ</mi><mi>j</mi></msub><mo separator="true">,</mo><msub><mi>σ</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><mo stretchy="true">⏟</mo></munder><mtext>likelihood</mtext></munder></mrow><annotation encoding="application/x-tex">
+\log p(\Psi, y) = \underbrace{\log p(\tau) + \log p(\mu) + \sum_j \log p(z_j)}_{\text{prior}} + \underbrace{\sum_j \log p(y_j \mid \theta_j, \sigma_j)}_{\text{likelihood}}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.9154em;vertical-align:-2.8654em;"></span><span class="mord munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-0.3207em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">prior</span></span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span class="mord munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span class="svg-align" style="top:-0.9882em;"><span class="pstrut" style="height:3.05em;"></span><span class="stretchy" style="height:0.548em;min-width:1.6em;"><span class="brace-left" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width='400em' height='0.548em' viewBox='0 0 400000 548' preserveAspectRatio='xMinYMin slice'><path d='M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z'/></svg></span><span class="brace-center" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width='400em' height='0.548em' viewBox='0 0 400000 548' preserveAspectRatio='xMidYMin slice'><path d='M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z'/></svg></span><span class="brace-right" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width='400em' height='0.548em' viewBox='0 0 400000 548' preserveAspectRatio='xMaxYMin slice'><path d='M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z'/></svg></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span class="mord"><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.1132em;">τ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord mathnormal">μ</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.0618em;"><span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.8654em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:3.7979em;vertical-align:-2.7479em;"></span><span class="mord munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-0.3021em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">likelihood</span></span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span class="mord munder"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span class="svg-align" style="top:-0.9882em;"><span class="pstrut" style="height:3.05em;"></span><span class="stretchy" style="height:0.548em;min-width:1.6em;"><span class="brace-left" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width='400em' height='0.548em' viewBox='0 0 400000 548' preserveAspectRatio='xMinYMin slice'><path d='M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z'/></svg></span><span class="brace-center" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width='400em' height='0.548em' viewBox='0 0 400000 548' preserveAspectRatio='xMidYMin slice'><path d='M199572 214
+c100.7 8.3 195.3 44 280 108 55.3 42 101.7 93 139 153l9 14c2.7-4 5.7-8.7 9-14
+ 53.3-86.7 123.7-153 211-199 66.7-36 137.3-56.3 212-62h199568v120H200432c-178.3
+ 11.7-311.7 78.3-403 201-6 8-9.7 12-11 12-.7.7-6.7 1-18 1s-17.3-.3-18-1c-1.3 0
+-5-4-11-12-44.7-59.3-101.3-106.3-170-141s-145.3-54.3-229-60H0V214z'/></svg></span><span class="brace-right" style="height:0.548em;"><svg xmlns="http://www.w3.org/2000/svg" width='400em' height='0.548em' viewBox='0 0 400000 548' preserveAspectRatio='xMaxYMin slice'><path d='M399994 0l6 6v35l-6 11c-56 104-135.3 181.3-238 232-57.3
+ 28.7-117 45-179 50H-300V214h399897c43.3-7 81-15 113-26 100.7-33 179.7-91 237
+-174 2.7-5 6-9 10-13 .7-1 7.3-1 20-1h17z'/></svg></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span class="mord"><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.8723em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.4138em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">σ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.0618em;"><span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:2.7479em;"><span></span></span></span></span></span></span></span></span></span>
+<p>Probably the most natural way to define &quot;sameness&quot; is to ask if the models produce the same joint log pdf — is this quantity identical up to an additive constant? This catches most implementation errors, for example, incorrect prior parameterizations,<span class="sn-ref"></span><span class="sidenote"> This is an easy mistake to make, even for LLMs — things like sd vs variance parameterization of the normal, shape and scale vs shape and rate for the gamma, and so on.</span> coding errors in parameter transforms &#40;that don&#39;t sit post-likelihood in the DAG&#41;, and so on.</p>
+<p>Accepting this definition of &quot;sameness&quot;, we can compute the difference in log densities between implementations at some test points <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Ψ</mi></mrow><annotation encoding="application/x-tex">\Psi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Ψ</span></span></span></span>, and if the spread of the difference is small enough across test points, we can declare the implementations identical, at least insofar as they define the same joint log density.<span class="sn-ref"></span><span class="sidenote"> Other differences can still exist, some of which I&#39;ll discuss in more detail below. As an example, this does nothing to check pushforwards of the sampled parameters, e.g. generated quantities in Stan.</span></p>
+<p>That is, we accept that two implementations are the same if, for a set of differences, </p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><msub><mtext>PPL</mtext><mn>1</mn></msub></msub><mo stretchy="false">(</mo><msub><mi mathvariant="normal">Ψ</mi><mi>i</mi></msub><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>−</mo><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><msub><mtext>PPL</mtext><mn>2</mn></msub></msub><mo stretchy="false">(</mo><msub><mi mathvariant="normal">Ψ</mi><mi>i</mi></msub><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">
+d_i = \log p_{\text{PPL}_1}(\Psi_i, y) - \log p_{\text{PPL}_2}(\Psi_i, y),
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.0001em;vertical-align:-0.2501em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">PPL</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2501em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord">Ψ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0001em;vertical-align:-0.2501em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">PPL</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2501em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord">Ψ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mpunct">,</span></span></span></span></span>
+<p>where both log densities expect constrained points,<span class="sn-ref"></span><span class="sidenote"> This is not actually the case, which we will discuss in a moment.</span> we come in under the following tolerance:</p>
+<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mi>i</mi></munder><mfrac><mrow><mo stretchy="false">∣</mo><msub><mi>d</mi><mi>i</mi></msub><mo>−</mo><mi mathvariant="normal">median</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>d</mi><mo stretchy="false">)</mo><mo stretchy="false">∣</mo></mrow><mrow><mi>max</mi><mo>⁡</mo><mtext> ⁣</mtext><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mn>1</mn><mo separator="true">,</mo><mtext> </mtext><mo stretchy="false">∣</mo><mi>log</mi><mo>⁡</mo><msub><mi>p</mi><msub><mtext>PPL</mtext><mn>2</mn></msub></msub><mo stretchy="false">(</mo><msub><mi mathvariant="normal">Ψ</mi><mi>i</mi></msub><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo stretchy="false">∣</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow></mfrac><mo>&lt;</mo><mn>1</mn><msup><mn>0</mn><mrow><mo>−</mo><mn>8</mn></mrow></msup><mtext> or so</mtext></mrow><annotation encoding="application/x-tex">
+\max_i \frac{\lvert d_i - \operatorname{median}(d) \rvert}{\max\!\big(1,\ \lvert \log p_{\text{PPL}_2}(\Psi_i, y) \rvert\big)} &lt; 10^{-8} \text{ or so}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:2.517em;vertical-align:-1.09em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4306em;"><span style="top:-2.3723em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">max</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7277em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.26em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">max</span><span class="mspace" style="margin-right:-0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="delimsizing size1">(</span></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mopen">∣</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">PPL</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3173em;"><span style="top:-2.357em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2501em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord">Ψ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)∣</span><span class="mord"><span class="delimsizing size1">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mopen">∣</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mop"><span class="mord mathrm">median</span></span><span class="mopen">(</span><span class="mord mathnormal">d</span><span class="mclose">)∣</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.09em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8641em;"></span><span class="mord">1</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">8</span></span></span></span></span></span></span></span></span><span class="mord text"><span class="mord"> or so</span></span></span></span></span></span>
+<p>Why this metric? Well, different PPLs compute slightly different things when they hand you &quot;the log density&quot;. This is an implementation detail; some &#40;Stan&#41; will expect, by default, samples after their internal bijections <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(\Psi)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mclose">)</span></span></span></span> into <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="double-struck">R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span>, and some &#40;Stan&#41; drop constants from the log density, and some don&#39;t. The second point is what we&#39;re correcting for here.</p>
+<p>When one PPL drops constants from the log density and another doesn&#39;t, the differences at some test points will be spread — because of numerical error — tightly around some arbitrary real number, not zero. So we check that the largest deviation from the median difference is small, instead of the largest deviation from zero.</p>
+<p>A quick note on the internal bijections thing:</p>
+<h2 id="different_ppls_use_different_internal_mappings_into_mathbb_rd"><a href="#different_ppls_use_different_internal_mappings_into_mathbb_rd" class="header-anchor">Different PPLs use different internal mappings into <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="double-struck">R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span></a></h2>
+<p>For this to work, we need to be sure that, say, the log density method for Turing &#40;<code>logjoint&#40;model, params&#41;</code>&#41; and the log density method for BridgeStan &#40;<code>log_density&#40;model, q&#41;</code>&#41; are doing the same thing. Why might this not be the case? Well, we usually define the model on some constrained subspace of <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="double-struck">R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span>, but we&#39;d like the sampler to move over all of <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="double-struck">R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span>, because otherwise the geometry can get wonky. PPLs handle this mostly under the hood for us, defining their own bijectors that map constrained random variables to unconstrained space, and map samples back.</p>
+<p>Stan, by default, expects unconstrained points to be passed into the log density. Most other PPLs expect constrained points. So we need to either force Stan to accept constrained points, or hit our constrained points with Stan&#39;s bijector to push them to the space Stan is expecting. Different languages can use different transforms, complicating the problem:</p>
+<table><tr><th align="right">library</th><th align="right">transform</th><th align="right">&#40;0.2, 0.3, 0.5&#41; becomes</th></tr><tr><td align="right">Stan 2.40</td><td align="right"><a href="https://mc-stan.org/docs/2_40/reference-manual/transforms.html#simplex-transform.section"><code>simplex&#91;3&#93;</code></a></td><td align="right">&#40;−0.2867, −0.5826&#41;</td></tr><tr><td align="right">Bijectors.jl 0.16</td><td align="right"><a href="https://github.com/TuringLang/Bijectors.jl/blob/main/src/bijectors/simplex.jl"><code>SimplexBijector</code></a></td><td align="right">&#40;−0.6931, −0.5108&#41;</td></tr><tr><td align="right">NumPyro 0.22</td><td align="right"><a href="https://num.pyro.ai/en/stable/distributions.html#stickbreakingtransform"><code>StickBreakingTransform</code></a></td><td align="right">&#40;−0.6931, −0.5108&#41;</td></tr><tr><td align="right">PyMC 6.4</td><td align="right"><a href="https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.distributions.transforms.SimplexTransform.html"><code>SimplexTransform</code></a></td><td align="right">&#40;−0.4406, −0.0351&#41;</td></tr></table>
+<p>
+<figure>
+<div class="code-tabs fig-tabs">
+  <div class="code-tab-buttons">
+    <button class="code-tab-btn active" data-tab="f1-diagram">Diagram</button>
+    <button class="code-tab-btn" data-tab="f1-sketch">Sketch</button>
+  </div>
+  <div id="f1-diagram" class="code-tab-content active">
+    <img class="fig-light" src="/assets/ppleval/simplex-bijections.svg" width="825" height="585" alt="The simplex and its image in the plane under the simplex transforms of Stan, Bijectors.jl and NumPyro, and PyMC" loading="lazy">
+    <img class="fig-dark" src="/assets/ppleval/simplex-bijections-dark.svg" width="825" height="585" alt="The simplex and its image in the plane under the simplex transforms of Stan, Bijectors.jl and NumPyro, and PyMC" loading="lazy">
+  </div>
+  <div id="f1-sketch" class="code-tab-content">
+    <img class="fig-sketch" src="/assets/ppleval/simplex-bijections-sketch.png" width="1588" height="1144" alt="Hand-drawn sketch of the same diagram" loading="lazy">
+  </div>
+</div>
+<figcaption>
+ Different PPLs map the same constrained points into <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="double-struck">R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span> differently. If the log density function expects points in the internal unconstrained space, the same test points may not be valid between different PPLs. 
+</figcaption>
+</figure>
+</p>
+<p>The other complexity here comes from the Jacobian correction. As a quick refresher, in the post, we&#39;ve been talking about mapping some constrained space to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="double-struck">R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span>. But the model isn&#39;t just a &quot;space&quot;, it&#39;s an &quot;allocation of probability over that space&quot;. Given the simplex, we have some measure — uniform, Dirichlet, etc. — that defines how probability mass is distributed over the constrained space. When we want to sample in the unconstrained space, we need to ensure that the distribution of probability mass in this new space is equivalent to the distribution in the old space. Otherwise we&#39;ll get distortions when mapping the points back for interpretation. To align the probability mass allocation when sampling, we multiply by the Jacobian correction.</p>
+<p>
+<figure>
+<div class="code-tabs fig-tabs">
+  <div class="code-tab-buttons">
+    <button class="code-tab-btn active" data-tab="f2-diagram">Diagram</button>
+    <button class="code-tab-btn" data-tab="f2-sketch">Sketch</button>
+  </div>
+  <div id="f2-diagram" class="code-tab-content active">
+    <img class="fig-light" src="/assets/ppleval/pushback-uniform.svg" width="519" height="290" alt="Uniform draws in the plane pile up along the edges and corners of the simplex when mapped back. &quot;Drawing uniformly over the plane&quot; is not well defined, so this draws points from some bounded area, and the distortion grows larger as the area increases." loading="lazy">
+    <img class="fig-dark" src="/assets/ppleval/pushback-uniform-dark.svg" width="519" height="290" alt="Uniform draws in the plane pile up along the edges and corners of the simplex when mapped back. &quot;Drawing uniformly over the plane&quot; is not well defined, so this draws points from some bounded area, and the distortion grows larger as the area increases." loading="lazy">
+  </div>
+  <div id="f2-sketch" class="code-tab-content">
+    <img class="fig-sketch" src="/assets/ppleval/pushback-uniform-sketch.png" width="784" height="582" alt="Hand-drawn sketch of the same diagram" loading="lazy">
+  </div>
+</div>
+<figcaption>
+ Samples drawn uniformly over <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi mathvariant="double-struck">R</mi><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb R^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">d</span></span></span></span></span></span></span></span></span></span></span> have a non-uniform distribution when pushed back to the simplex. 
+</figcaption>
+</figure>
+</p>
+<p>BridgeStan, which takes in unconstrained points, allows us the option of seeing either <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log p(\Psi, y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span></span></span></span> or <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>+</mo><mi>log</mi><mo>⁡</mo><mo stretchy="false">∣</mo><mi>det</mi><mo>⁡</mo><msub><mi>J</mi><msup><mi>f</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup></msub><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo stretchy="false">)</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo><mo stretchy="false">∣</mo></mrow><annotation encoding="application/x-tex">\log p(\Psi, y) + \log \lvert \det J_{f^{-1}}\big(f(\Psi)\big) \rvert</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mopen">∣</span><span class="mop">det</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5224em;margin-left:-0.0962em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7463em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3137em;"><span></span></span></span></span></span></span><span class="mord"><span class="delimsizing size1">(</span></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mclose">)</span><span class="mord"><span class="delimsizing size1">)</span></span><span class="mclose">∣</span></span></span></span> when evaluating <code>log_density&#40;model, q&#41;</code>. By default, <em>this includes the Jacobian adjustment</em>. This will also mess with our comparison; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log p(\Psi, y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span></span></span></span> and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>p</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo><mo>+</mo><mi>log</mi><mo>⁡</mo><mo stretchy="false">∣</mo><mi>det</mi><mo>⁡</mo><msub><mi>J</mi><msup><mi>f</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup></msub><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="normal">Ψ</mi><mo stretchy="false">)</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo><mo stretchy="false">∣</mo></mrow><annotation encoding="application/x-tex">\log p(\Psi, y) + \log \lvert \det J_{f^{-1}}\big(f(\Psi)\big) \rvert</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2em;vertical-align:-0.35em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mopen">∣</span><span class="mop">det</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5224em;margin-left:-0.0962em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7463em;"><span style="top:-2.786em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3137em;"><span></span></span></span></span></span></span><span class="mord"><span class="delimsizing size1">(</span></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord">Ψ</span><span class="mclose">)</span><span class="mord"><span class="delimsizing size1">)</span></span><span class="mclose">∣</span></span></span></span> differ by a non-constant term, so we can&#39;t compare them. The Jacobian adjustment also depends on the specific bijection chosen, so we should turn that off for a clean comparison.</p>
+<p>When checking alignment between PPLs, the most important component is understanding what the <code>log_density</code> function is actually doing, and then ensuring you set things up so that it expects the same &#40;constrained&#41; points and does not include a Jacobian correction. I don&#39;t know of any languages that force you to include the Jacobian correction or fail to supply an <code>unconstrain&#40;.&#41;</code> function, but if they exist, they&#39;d be pretty annoying to work with.</p>
+<h2 id="what_cant_this_check"><a href="#what_cant_this_check" class="header-anchor">What can&#39;t this check?</a></h2>
+<p>It&#39;s possible to get the &quot;same model&quot; in some sense while returning a different log density. And it&#39;s possible to get a &quot;different model&quot;, in a sense, with the same log density. As an example of the latter case, consider a model which has the same model blocks, but contains different — perhaps flawed — pushforwards of those parameters, e.g. in Stan&#39;s <code>generated quantities</code>. This can actually be pretty consequential — imagine a model that marginalizes or pseudo-marginalizes out most of its latent parameters; messing up the GQ step here can totally ruin the model results, and ensuring matching log densities does nothing to help here.</p>
+<p>In the other direction, many optimizations we&#39;d like to make to models return different log densities. Marginalization or conjugacy tricks are one example here — anything that changes the sampled dims will trip this method up — but also many approximate methods &#40;e.g. low-rank representations of nonparametrics&#41; can have different log densities while being, in some sense, &quot;basically the same model&quot;.</p>
+<p>This is potentially problematic if log density equality is intended to be used as a target for optimizations within a PPL &#40;e.g. taking a Stan model and making it &quot;fast&quot; via LLM iteration&#41;.</p>
+<h2 id="results"><a href="#results" class="header-anchor">Results</a></h2>
+<p>WIP: Add some concrete examples here, maybe as a new blog.</p>
+<h2 id="llm_disclaimer"><a href="#llm_disclaimer" class="header-anchor">LLM disclaimer</a></h2>
+<p>All writing is my own. I used Claude for formatting, including adding sources to &#40;and turning raw text into&#41; tables &#40;e.g. for the simplex bijectors&#41;, turning sketches into diagrams, custom CSS, checking code, and proofreading math for correctness, along with related fiddly tasks and optimizations.</p>
+</div><footer class="colophon">
+  <div class="rule-top">
+    <p>JasonPekos. Last modified: November 16, 2026. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.</p>
+  </div>
+</footer>
+
+<script>
+/* theme toggle — light is the default, dark is opt-in; an explicit choice
+   persists across pages (restored before first paint in head.html) */
+(function () {
+  var btn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  var fadeTimer = null;
+  if (root.getAttribute('data-theme') === 'dark') btn.setAttribute('aria-pressed', 'true');
+  btn.addEventListener('click', function () {
+    root.classList.add('theme-fade');          // everything crosses together
+    var dark = root.getAttribute('data-theme') !== 'dark';
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    btn.setAttribute('aria-pressed', String(dark));
+    try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(function () { root.classList.remove('theme-fade'); }, 420);
+  });
+})();
+
+/* Rougier pass: fade punctuation, popout the sampling ~ — runs after hljs,
+   walks TEXT nodes only (never inside strings, comments, or macro spans) */
+window.addEventListener("load", function () {
+  requestAnimationFrame(function () {
+    document.querySelectorAll("pre code").forEach(function (code) {
+      var tw = document.createTreeWalker(code, NodeFilter.SHOW_TEXT, null);
+      var nodes = [];
+      while (tw.nextNode()) {
+        var el = tw.currentNode.parentElement;
+        if (el && el.closest(".hljs-string, .hljs-comment, .hljs-meta, .cp, .ctld")) continue;
+        nodes.push(tw.currentNode);
+      }
+      nodes.forEach(function (n) {
+        var t = n.nodeValue;
+        if (!/[()<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex"></annotation></semantics></math></span><span class="katex-html" aria-hidden="true"></span></span></span>{},;]| ~ /.test(t)) return;
+        var frag = document.createDocumentFragment();
+        t.split(/([()<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex"></annotation></semantics></math></span><span class="katex-html" aria-hidden="true"></span></span></span>{},;]| ~ )/).forEach(function (part) {
+          if (!part) return;
+          if (part === " ~ ") {
+            frag.append(" ");
+            var m = document.createElement("span");
+            m.className = "ctld"; m.textContent = "~";
+            frag.append(m); frag.append(" ");
+          } else if (/^[()<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow></mrow><annotation encoding="application/x-tex"></annotation></semantics></math></span><span class="katex-html" aria-hidden="true"></span></span></span>{},;]$/.test(part)) {
+            var sp = document.createElement("span");
+            sp.className = "cp"; sp.textContent = part;
+            frag.append(sp);
+          } else frag.append(part);
+        });
+        n.replaceWith(frag);
+      });
+    });
+  });
+});
+
+/* code-language tabs (NumPyro / Turing) */
+document.querySelectorAll('.code-tabs').forEach(function (group) {
+  var buttons = group.querySelectorAll('.code-tab-btn');
+  var panels = group.querySelectorAll('.code-tab-content');
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      buttons.forEach(function (b) { b.classList.remove('active'); });
+      panels.forEach(function (pn) { pn.classList.remove('active'); });
+      btn.classList.add('active');
+      var target = group.querySelector('#' + btn.dataset.tab);
+      if (target) target.classList.add('active');
+    });
+  });
+});
+
+/* mark the active nav link */
+(function () {
+  var here = location.pathname.replace(/index\.html$/, '');
+  document.querySelectorAll('.topnav a.navlink').forEach(function (a) {
+    var p = a.getAttribute('href');
+    if (p === here || (p !== '/' && here.indexOf(p) === 0) ||
+        (p === '/menu1/' && here.indexOf('/pages/') === 0)) {
+      a.setAttribute('aria-current', 'page');
+    }
+  });
+})();
+
+/* title-bar water — still, blank water; every so often a boat
+   crosses (seen from above), trailing a Kelvin-ish wake that rings
+   outward and dissipates back to stillness. seeded, so deterministic. */
+(function () {
+  var el = document.getElementById("oceanBar");
+  if (!el) return;
+  var last = null;   // last-painted frame; identical frames skip the innerHTML write
+  function paint(out) { if (out !== last) { el.innerHTML = out; last = out; } }
+  var s = 77041 >>> 0;
+  function rand() { s = (1664525 * s + 1013904223) >>> 0; return s / 4294967296; }
+
+  var cw, lh, cols, rows;
+  function measure() {
+    var probe = document.createElement("span");
+    probe.textContent = "MMMMMMMMMM";
+    probe.style.visibility = "hidden";
+    el.appendChild(probe);
+    cw = probe.getBoundingClientRect().width / 10;
+    el.removeChild(probe);
+    lh = parseFloat(getComputedStyle(el).lineHeight);
+    cols = Math.max(20, Math.ceil(el.clientWidth / cw));
+    rows = Math.max(4, Math.floor(el.clientHeight / lh));
+  }
+  measure();
+  addEventListener("resize", function () { measure(); });
+
+  var V = 24;      // boat speed, columns / second
+  var TAU = 2.4;   // wake decay time (s)
+  var RING = 1.6;  // ripple spread speed (rows / second)
+  var pass = null, nextAt = 2.0;
+
+  // deterministic per-cell noise, stable within a pass (ragged, not fizzing)
+  function cellNoise(c, r, seed) {
+    var x = (c * 73856093 ^ r * 19349663 ^ seed * 83492791) >>> 0;
+    x = ((x ^ (x >>> 13)) * 1274126177) >>> 0;
+    return ((x ^ (x >>> 16)) >>> 0) / 4294967296;
+  }
+
+  function frame(nowMs) {
+    var now = nowMs / 1000;
+    if (!pass && now >= nextAt) {
+      // visual entry angle ~uniform in ±65°; steep tracks extend off-screen,
+      // so the boat appears to sail in over the top (or bottom) edge
+      var phi = (rand() * 2 - 1) * 1.13;             // radians, ±~65°
+      pass = { t0: now,
+               cx: cols * (0.2 + rand() * 0.6),      // a point the track
+               cy: rows * (0.2 + rand() * 0.6),      //   crosses in-band
+               slope: Math.tan(phi) / 1.76,          // rows/col (cell aspect)
+               ltr: rand() < 0.5,
+               seed: (rand() * 1e9) | 0 };
+    }
+    var xb = null;
+    if (pass) {
+      var dt = now - pass.t0;
+      xb = pass.ltr ? dt * V : cols - dt * V;
+      if (dt > cols / V + TAU * 2.5) {               // boat gone, wake stilled
+        pass = null; xb = null;
+        nextAt = now + 6 + rand() * 10;              // next crossing in 6-16s
+      }
+    }
+    // row of the boat's track at column c — a line through (cx, cy);
+    // rows outside the band are simply never rendered (the mask)
+    function trackRow(c) {
+      return pass.cy + pass.slope * (c - pass.cx);
+    }
+    var out = "";
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var ch = " ";
+        if (xb !== null) {
+          var behind = pass.ltr ? xb - c : c - xb;   // columns behind the bow
+          var rc = trackRow(c);
+          if (behind >= -0.6 && behind < 1.4 && Math.abs(r - rc) < 0.51) {
+            ch = '<span class="boat">@</span>';      // the boat, in accent
+          } else if (behind >= 1.4 && behind < 4 && Math.abs(r - rc) < 0.51) {
+            ch = '<span class="boat">=</span>';      // churn at the stern
+          } else if (behind >= 0) {
+            var age = behind / V;                    // seconds since the bow passed
+            var u = cellNoise(c, r, pass.seed);      // ragged arms, uneven fade
+            var spread = RING * (0.8 + 0.5 * cellNoise(c, 9999, pass.seed));
+            var arm = Math.abs(r - rc) - spread * age;
+            var ring = Math.exp(-(arm * arm) / 0.6)
+                     * Math.exp(-age / TAU) * (0.55 + 0.9 * u);
+            if (ring > 0.5) ch = "~";
+            else if (ring > 0.22) ch = "-";
+            else if (ring > 0.16 && u > 0.75) ch = "-";   // stray ripple flecks
+            if (ch !== " ") {                             // fresh wake runs purple;
+              var u2 = cellNoise(c + 101, r + 57, pass.seed + 7);
+              if (u2 < Math.exp(-behind / 14)) {          //   odds fade with distance
+                ch = '<span class="ripA">' + ch + '</span>';
+              }
+            }
+          }
+        }
+        out += ch;
+      }
+      if (r < rows - 1) out += "\n";
+    }
+    paint(out);
+  }
+
+  /* dark mode gets the northern lights; light mode keeps the boats.
+     three sinuous curtains, each a Gaussian ribbon around a drifting
+     S-shaped centreline: green core, purple fringe, slow fade in/out */
+  var RIBBONS = [
+    { f1: 1.3, f2: 2.6, a1: 0.30, a2: 0.14, s1:  0.045, s2: -0.070, w: 1.15, T: 63, ph: 0.0 },
+    { f1: 0.9, f2: 2.1, a1: 0.26, a2: 0.12, s1: -0.035, s2:  0.055, w: 0.95, T: 89, ph: 2.4 },
+    { f1: 1.7, f2: 3.4, a1: 0.22, a2: 0.10, s1:  0.060, s2: -0.045, w: 0.80, T: 76, ph: 4.4 }
+  ];
+  function aurora(nowMs) {
+    var t = nowMs / 1000, out = "";
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var x = c / cols, core = 0, fringe = 0;
+        for (var i = 0; i < RIBBONS.length; i++) {
+          var q = RIBBONS[i];
+          // gated life-cycle: each ribbon is dark ~80% of its period and
+          // blooms smoothly through the rest — most of the time, no aurora
+          var raw = Math.sin(6.283 * t / q.T + q.ph);
+          if (raw <= 0.68) continue;
+          var life = Math.pow((raw - 0.68) / 0.32, 1.3);
+          var y = rows * (0.5
+                + q.a1 * Math.sin(6.283 * (q.f1 * x) + q.s1 * 6.283 * t + q.ph)
+                + q.a2 * Math.sin(6.283 * (q.f2 * x) + q.s2 * 6.283 * t + 1.7 * q.ph));
+          var env = 0.6 + 0.4 * Math.sin(6.283 * (0.8 * x) + 0.11 * t + q.ph); // glow drifts along the ribbon
+          var d = Math.abs(r - y) / q.w;
+          var g = Math.exp(-d * d) * life * env;
+          core += g;
+          fringe += Math.exp(-(d - 1.9) * (d - 1.9) / 1.4) * life * env * 0.7;
+        }
+        var b = Math.max(core, fringe * 0.85);
+        if (b <= 0.09) { out += " "; continue; }
+        // massive thinning: most lit cells stay dark; survival odds scale
+        // with brightness and twinkle slowly per cell
+        var u = cellNoise(c, r, 424243);
+        var tw = 0.6 + 0.4 * Math.sin(t * (0.4 + 0.5 * u) + u * 40);
+        if (u > b * 0.5 * tw) { out += " "; continue; }
+        var ch = b > 0.62 ? "|" : b > 0.38 ? "!" : b > 0.2 ? ":" : ".";
+        var cls = (b > 0.7 && u > 0.18) ? "aur-w"              // muted-grey sparkle (see .aur-w)
+                : (core >= fringe ? "aur-g" : "aur-p");
+        out += '<span class="' + cls + '">' + ch + "</span>";
+      }
+      if (r < rows - 1) out += "\n";
+    }
+    paint(out);
+  }
+  function tick(now) {
+    if (document.documentElement.getAttribute("data-theme") === "dark") aurora(now);
+    else frame(now);
+  }
+  tick(0);
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var visible = true, paused = reduced;
+  if (!reduced) {
+    if ("IntersectionObserver" in window)
+      new IntersectionObserver(function (es) {
+        visible = es[es.length - 1].isIntersecting;   // newest record, not oldest
+        if (visible && !paused) tick(performance.now());   // catch theme flips
+      }).observe(el);
+    setInterval(function () {
+      if (document.hidden) return;                    // no repaints in hidden tabs
+      if (visible && !paused) tick(performance.now());
+    }, 90);
+    el.addEventListener("pointerup", function () { paused = !paused; });
+    el.title = "click — pause";
+  }
+  var tb = document.getElementById("themeBtn");
+  if (tb) tb.addEventListener("click", function () { setTimeout(function () { tick(0); }, 0); });
+})();
+</script>
+
+ 
+
+
+ 
+ 
+
+ 
+</body>
+</html>
